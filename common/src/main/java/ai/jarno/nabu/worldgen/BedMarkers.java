@@ -31,15 +31,43 @@ public final class BedMarkers {
     private BedMarkers() {
     }
 
-    public static void handle(LevelAccessor level, StructureTemplate.StructureBlockInfo marker) {
+    /**
+     * @param piecePosition world position of the piece being placed, used only as a fallback
+     *                      origin -- see {@link #flagAround}
+     */
+    public static void handle(LevelAccessor level, StructureTemplate.StructureBlockInfo marker, BlockPos piecePosition) {
         CompoundTag nbt = marker.nbt();
         if (nbt == null || !BED_MARKER.equals(nbt.getStringOr("metadata", ""))) {
             return;
         }
 
-        BlockPos origin = marker.pos();
-        int flagged = 0;
+        BlockPos markerPos = marker.pos();
 
+        // Vanilla's own marker handlers read this position as world-absolute, but that is not
+        // something we can prove without running worldgen. If the absolute reading finds
+        // nothing, fall back to treating it as piece-relative. Whichever hits is logged, so the
+        // ambiguity resolves itself the first time a Wonder generates.
+        int flagged = flagAround(level, markerPos);
+        if (flagged > 0) {
+            Nabu.LOGGER.info("Bed marker at {} flagged {} bed(s) [absolute].", markerPos, flagged);
+            return;
+        }
+
+        BlockPos relative = piecePosition.offset(markerPos);
+        flagged = flagAround(level, relative);
+        if (flagged > 0) {
+            Nabu.LOGGER.info("Bed marker at {} flagged {} bed(s) [piece-relative].", relative, flagged);
+            return;
+        }
+
+        Nabu.LOGGER.warn(
+                "Bed marker found no planting beds near {} or {}. Is the marker within {} blocks "
+                        + "horizontally and {} vertically of the beds?",
+                markerPos, relative, MARKER_RADIUS_HORIZONTAL, MARKER_RADIUS_VERTICAL);
+    }
+
+    private static int flagAround(LevelAccessor level, BlockPos origin) {
+        int flagged = 0;
         for (BlockPos candidate : BlockPos.betweenClosed(
                 origin.offset(-MARKER_RADIUS_HORIZONTAL, -MARKER_RADIUS_VERTICAL, -MARKER_RADIUS_HORIZONTAL),
                 origin.offset(MARKER_RADIUS_HORIZONTAL, MARKER_RADIUS_VERTICAL, MARKER_RADIUS_HORIZONTAL))) {
@@ -47,12 +75,11 @@ public final class BedMarkers {
                 continue;
             }
             if (level.getBlockEntity(candidate) instanceof PlantingBedBlockEntity bed) {
-                // One terrace per level, matching how the controller derives its indices.
+                // One terrace per level, matching how the shrine derives its indices.
                 bed.flagAsWonderBed(candidate.getY());
                 flagged++;
             }
         }
-
-        Nabu.LOGGER.debug("Bed marker at {} flagged {} bed(s).", origin, flagged);
+        return flagged;
     }
 }

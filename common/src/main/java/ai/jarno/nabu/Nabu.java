@@ -2,6 +2,7 @@ package ai.jarno.nabu;
 
 import ai.jarno.nabu.registry.NabuBlockEntities;
 import ai.jarno.nabu.registry.NabuBlocks;
+import ai.jarno.nabu.registry.NabuCreativeTabs;
 import ai.jarno.nabu.registry.NabuItems;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
@@ -22,7 +23,9 @@ public final class Nabu {
     }
 
     public static void init() {
-        // Blocks first: block items and block entity types both resolve blocks on registration.
+        // Tab before items, since every item files itself under it.
+        NabuCreativeTabs.register();
+        // Blocks before items and block entity types, which both resolve blocks on registration.
         NabuBlocks.register();
         NabuItems.register();
         NabuBlockEntities.register();

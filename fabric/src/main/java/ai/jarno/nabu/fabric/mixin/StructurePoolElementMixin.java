@@ -28,6 +28,6 @@ public abstract class StructurePoolElementMixin {
             RandomSource random,
             BoundingBox chunkBB,
             CallbackInfo ci) {
-        BedMarkers.handle(level, dataMarker);
+        BedMarkers.handle(level, dataMarker, position);
     }
 }
