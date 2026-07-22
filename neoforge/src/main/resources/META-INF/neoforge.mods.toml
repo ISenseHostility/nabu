@@ -1,0 +1,33 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "nabu"
+version = "${version}"
+displayName = "Nabu"
+authors = "Jarno"
+description = '''
+Restore the ruined Hanging Gardens of Babylon by rebuilding its ancient irrigation.
+'''
+
+[[dependencies.nabu]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.nabu]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.nabu]]
+modId = "architectury"
+type = "required"
+versionRange = "[21.0.4,)"
+ordering = "AFTER"
+side = "BOTH"

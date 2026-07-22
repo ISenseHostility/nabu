@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "nabu",
+  "version": "${version}",
+  "name": "Nabu",
+  "description": "Restore the ruined Hanging Gardens of Babylon by rebuilding its ancient irrigation.",
+  "authors": [
+    "Jarno"
+  ],
+  "license": "All Rights Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "ai.jarno.nabu.fabric.NabuFabric"
+    ],
+    "client": [
+      "ai.jarno.nabu.fabric.NabuFabricClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "architectury": ">=21.0.4",
+    "fabric-api": "*"
+  }
+}

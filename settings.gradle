@@ -1,0 +1,15 @@
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url = 'https://maven.architectury.dev/' }
+        // Required: Architectury Loom pulls Forge tooling (mcinjector, DiffPatch) from here.
+        maven { url = 'https://maven.minecraftforge.net/' }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'nabu'
+
+include 'common'
+include 'fabric'
+include 'neoforge'
