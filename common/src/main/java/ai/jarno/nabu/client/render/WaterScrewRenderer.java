@@ -64,9 +64,11 @@ public class WaterScrewRenderer implements BlockEntityRenderer<WaterScrewBlockEn
             SubmitNodeCollector collector,
             CameraRenderState camera) {
         poseStack.pushPose();
-        // Model space is centred on the block; the mesh is built around its own origin.
+        // ModelPart already divides its vertices by 16 on the way out, so the mesh's pixel
+        // dimensions arrive here as block units and the 16-pixel shaft is exactly one block
+        // tall. Scaling by 1/16 again here is what shrank it to a single pixel. All this
+        // needs is the recentre onto the middle of the block, which the mesh is built around.
         poseStack.translate(0.5F, 0.5F, 0.5F);
-        poseStack.scale(0.0625F, 0.0625F, 0.0625F);
         poseStack.mulPose(Axis.YP.rotationDegrees(state.spin));
 
         collector.submitModelPart(
