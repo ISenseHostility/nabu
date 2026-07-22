@@ -1,5 +1,6 @@
 package ai.jarno.nabu.block;
 
+import ai.jarno.nabu.blockentity.PlantingBedBlockEntity;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -9,6 +10,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -26,7 +29,7 @@ import org.jspecify.annotations.Nullable;
  * ordinary crops. Unlike farmland they never revert to dirt -- they are part of the Wonder's
  * fixed geometry, and letting them crumble would erode the structure itself.
  */
-public class PlantingBedBlock extends Block {
+public class PlantingBedBlock extends Block implements EntityBlock {
     public static final MapCodec<PlantingBedBlock> CODEC = simpleCodec(PlantingBedBlock::new);
 
     public static final EnumProperty<BedTier> TIER = EnumProperty.create("tier", BedTier.class);
@@ -98,10 +101,24 @@ public class PlantingBedBlock extends Block {
     }
 
     private static void apply(Level level, BlockPos pos, BlockState state, int moisture) {
+        BedTier previous = state.getValue(TIER);
         BedTier tier = computeTier(level, pos, moisture);
-        if (state.getValue(MOISTURE) != moisture || state.getValue(TIER) != tier) {
-            level.setBlock(pos, state.setValue(MOISTURE, moisture).setValue(TIER, tier), Block.UPDATE_CLIENTS);
+        if (state.getValue(MOISTURE) == moisture && previous == tier) {
+            return;
         }
+
+        // Same block, so the block entity survives this and its link is still intact below.
+        level.setBlock(pos, state.setValue(MOISTURE, moisture).setValue(TIER, tier), Block.UPDATE_CLIENTS);
+
+        if (tier == BedTier.BOOSTED && previous != BedTier.BOOSTED
+                && level.getBlockEntity(pos) instanceof PlantingBedBlockEntity bed) {
+            bed.reportBoosted(level);
+        }
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new PlantingBedBlockEntity(pos, state);
     }
 
     private static BedTier computeTier(LevelReader level, BlockPos pos, int moisture) {

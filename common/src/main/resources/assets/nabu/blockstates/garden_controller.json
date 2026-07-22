@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "nabu:block/garden_controller"
+    }
+  }
+}

@@ -1,6 +1,8 @@
 package ai.jarno.nabu.registry;
 
 import ai.jarno.nabu.Nabu;
+import ai.jarno.nabu.blockentity.GardenControllerBlockEntity;
+import ai.jarno.nabu.blockentity.PlantingBedBlockEntity;
 import ai.jarno.nabu.blockentity.WaterScrewBlockEntity;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -20,6 +22,21 @@ public final class NabuBlockEntities {
                     () -> new BlockEntityType<>(
                             WaterScrewBlockEntity::new,
                             Set.of(NabuBlocks.WATER_SCREW.get())));
+
+    /** Non-ticking; pure storage for the bed's link to its controller. */
+    public static final RegistrySupplier<BlockEntityType<PlantingBedBlockEntity>> PLANTING_BED =
+            BLOCK_ENTITY_TYPES.register(
+                    "planting_bed",
+                    () -> new BlockEntityType<>(
+                            PlantingBedBlockEntity::new,
+                            Set.of(NabuBlocks.PLANTING_BED.get())));
+
+    public static final RegistrySupplier<BlockEntityType<GardenControllerBlockEntity>> GARDEN_CONTROLLER =
+            BLOCK_ENTITY_TYPES.register(
+                    "garden_controller",
+                    () -> new BlockEntityType<>(
+                            GardenControllerBlockEntity::new,
+                            Set.of(NabuBlocks.GARDEN_CONTROLLER.get())));
 
     private NabuBlockEntities() {
     }

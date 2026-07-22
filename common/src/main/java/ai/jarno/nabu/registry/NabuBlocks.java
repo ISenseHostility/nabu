@@ -2,6 +2,7 @@ package ai.jarno.nabu.registry;
 
 import ai.jarno.nabu.Nabu;
 import ai.jarno.nabu.block.ExtinctCropBlock;
+import ai.jarno.nabu.block.GardenControllerBlock;
 import ai.jarno.nabu.block.PlantingBedBlock;
 import ai.jarno.nabu.block.WaterScrewBlock;
 import dev.architectury.registry.registries.DeferredRegister;
@@ -32,6 +33,12 @@ public final class NabuBlocks {
             "silphium",
             () -> new ExtinctCropBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.WHEAT)
                     .setId(Nabu.key(Registries.BLOCK, "silphium"))));
+
+    public static final RegistrySupplier<GardenControllerBlock> GARDEN_CONTROLLER = BLOCKS.register(
+            "garden_controller",
+            () -> new GardenControllerBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.CHISELED_STONE_BRICKS)
+                    .strength(3.0F)
+                    .setId(Nabu.key(Registries.BLOCK, "garden_controller"))));
 
     private NabuBlocks() {
     }

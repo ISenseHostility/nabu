@@ -23,6 +23,12 @@ public final class NabuItems {
                     NabuBlocks.PLANTING_BED.get(),
                     new Item.Properties().setId(Nabu.key(Registries.ITEM, "planting_bed"))));
 
+    public static final RegistrySupplier<Item> GARDEN_CONTROLLER = ITEMS.register(
+            "garden_controller",
+            () -> new BlockItem(
+                    NabuBlocks.GARDEN_CONTROLLER.get(),
+                    new Item.Properties().setId(Nabu.key(Registries.ITEM, "garden_controller"))));
+
     /** Plantable seed. Placing it sows the crop. */
     public static final RegistrySupplier<Item> SILPHIUM_SEEDS = ITEMS.register(
             "silphium_seeds",

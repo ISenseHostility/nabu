@@ -6,6 +6,8 @@ import ai.jarno.nabu.registry.NabuItems;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common entry point. Everything here runs on both loaders; platform modules do nothing
@@ -13,6 +15,8 @@ import net.minecraft.resources.ResourceKey;
  */
 public final class Nabu {
     public static final String MOD_ID = "nabu";
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private Nabu() {
     }
