@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "ai.jarno.nabu.fabric.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "AnimalMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -6,6 +6,7 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 
 public final class NabuItems {
     public static final DeferredRegister<Item> ITEMS =
@@ -40,6 +41,17 @@ public final class NabuItems {
     public static final RegistrySupplier<Item> SILPHIUM = ITEMS.register(
             "silphium",
             () -> new Item(new Item.Properties().setId(Nabu.key(Registries.ITEM, "silphium"))));
+
+    /**
+     * One-time trophy for restoring the Gardens. Carried in the offhand, it makes breeding
+     * animals occasionally bear more than one young.
+     */
+    public static final RegistrySupplier<Item> FERTILITY_CHARM = ITEMS.register(
+            "fertility_charm",
+            () -> new Item(new Item.Properties()
+                    .stacksTo(1)
+                    .rarity(Rarity.EPIC)
+                    .setId(Nabu.key(Registries.ITEM, "fertility_charm"))));
 
     private NabuItems() {
     }

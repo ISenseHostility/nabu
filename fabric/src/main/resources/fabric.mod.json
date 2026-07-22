@@ -17,6 +17,9 @@
       "ai.jarno.nabu.fabric.NabuFabricClient"
     ]
   },
+  "mixins": [
+    "nabu.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.19.3",
     "minecraft": "~26.2",
