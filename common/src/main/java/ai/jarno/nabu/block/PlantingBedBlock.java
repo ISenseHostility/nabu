@@ -83,7 +83,7 @@ public class PlantingBedBlock extends Block implements EntityBlock {
 
     @Override
     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        int moisture = nearWater(level, pos) || level.isRainingAt(pos.above())
+        int moisture = isWet(level, pos)
                 ? MAX_MOISTURE
                 : Math.max(state.getValue(MOISTURE) - 1, 0);
         apply(level, pos, state, moisture);
@@ -93,10 +93,16 @@ public class PlantingBedBlock extends Block implements EntityBlock {
      * Recompute this bed after something nearby changed -- a screw starting or stopping.
      * Screws call this on their own transitions so boosting is immediate rather than waiting
      * on a random tick.
+     *
+     * <p>Wetting is picked up here too, since a screw that just delivered has changed whether
+     * this bed is near water and the tier now depends on that. Drying is deliberately left to
+     * the random tick, so a bed fades out gradually rather than snapping back the instant a
+     * screw stops.
      */
     public static void refresh(Level level, BlockPos pos, BlockState state) {
         if (state.getBlock() instanceof PlantingBedBlock) {
-            apply(level, pos, state, state.getValue(MOISTURE));
+            int moisture = isWet(level, pos) ? MAX_MOISTURE : state.getValue(MOISTURE);
+            apply(level, pos, state, moisture);
         }
     }
 
@@ -122,11 +128,20 @@ public class PlantingBedBlock extends Block implements EntityBlock {
     }
 
     private static BedTier computeTier(LevelReader level, BlockPos pos, int moisture) {
-        // Boosted beats watered: a running screw wins no matter how wet the bed already is.
-        if (runningScrewInRange(level, pos)) {
-            return BedTier.BOOSTED;
+        // The tiers are a ladder, not three independent states. A bed has to be wet at all
+        // before a screw can lift it the rest of the way, so a bone-dry bed sitting next to a
+        // running screw reads DRY until the water actually arrives. The anti-cheese still
+        // holds from the other side: water alone tops out at WATERED however it got there, so
+        // a player-placed source can never reach BOOSTED.
+        if (moisture <= 0) {
+            return BedTier.DRY;
         }
-        return moisture > 0 ? BedTier.WATERED : BedTier.DRY;
+        return runningScrewInRange(level, pos) ? BedTier.BOOSTED : BedTier.WATERED;
+    }
+
+    /** Whether anything is watering this bed right now: water in range, or rain overhead. */
+    private static boolean isWet(Level level, BlockPos pos) {
+        return nearWater(level, pos) || level.isRainingAt(pos.above());
     }
 
     private static boolean runningScrewInRange(LevelReader level, BlockPos pos) {

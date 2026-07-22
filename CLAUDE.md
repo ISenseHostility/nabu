@@ -54,15 +54,21 @@ Structures are **NBT + JSON template pools**, not blocks placed from code. Recip
 
 These are load-bearing. Don't "simplify" them away — each one closes a specific exploit or bug.
 
-**Bed tiers are a gradient, not a lock.** Dry / Watered / Boosted. Ordinary water (bucket, any vanilla source) gives **Watered** — normal farming, always available to everyone. Only a *running screw in range* gives **Boosted**. Boosted beats Watered. This is the anti-cheese: a player-placed water source can never produce Boosted, so the puzzle is the only path to the real reward, while nobody is locked out of ordinary farming.
+**Bed tiers are a ladder, not a lock.** Dry / Watered / Boosted, climbed in order. Ordinary water (bucket, any vanilla source, rain) gives **Watered** — normal farming, always available to everyone. **Boosted needs both**: the bed must be wet *and* have a running screw in range. Water alone tops out at Watered however it got there, so a player-placed source can never produce Boosted — that's the anti-cheese, the puzzle is the only path to the real reward while nobody is locked out of ordinary farming. A screw alone doesn't skip a rung either: a bone-dry bed next to a running screw reads Dry until the water actually reaches it.
+
+**Wetting is immediate, drying is gradual.** A bed re-reads its moisture whenever something pushes a refresh at it (a screw starting or stopping), so a delivered source boosts on the tick it lands. Decay stays on the random tick alone, so a bed fades out over time instead of snapping back to Dry the moment a screw stops. Never drain moisture from a refresh path.
 
 **Extinct crops grow anywhere but only *fruit* when Boosted.** Growth and fruiting are separate checks.
 
 **The screw uses charge-based hysteresis.** Intake has water → charge ramps → at threshold, activate. Intake loses water → charge decays → at zero, deactivate. Never place/remove on the same tick as the intake changes; that thrashes block updates.
 
-**The screw's placed water source is *tracked*.** Store that we placed it (and where). On deactivate, only clear the block if it's still water. Clean up in the block entity's removal handler so breaking an active screw never strands a source. Never delete water we didn't place.
+**The screw's placed water source is *tracked*, and the claim is re-checked, not trusted.** Store that we placed it (and where). While the screw runs, re-evaluate the output every tick: air → place and claim; anything else → drop the claim, because whatever displaced our water isn't ours to remove. That's what makes a buried source come back once the obstruction is cleared, and what stops us deleting a player's own water dropped into the gap. On deactivate, only clear the block if it's still water. Clean up in the block entity's removal handler so breaking an active screw never strands a source. Never delete water we didn't place.
 
-**Screw intake is satisfied by the reservoir OR another screw's output.** That's what enables the vertical chain.
+Output maintenance is **separate from** the charge hysteresis above — re-delivering doesn't touch the start/stop decision, so it can run every tick without thrashing.
+
+**Screw intake is satisfied by the reservoir, another screw's output, OR a running screw directly below.** That's what enables the vertical chain, in both its forms: spaced (screw / water / screw, each lifting into the gap above it) and stacked flush (screw on screw, where there's no gap for a source block at all). Only the topmost screw in a flush stack delivers water — the ones below it run, own nothing, and exist to pass the intake signal up.
+
+**A stack primes one stage at a time.** Each screw earns its charge from empty, so water surfaces at the top of a column only after every screw beneath it has come up — roughly `CHARGE_MAX` ticks per stage. That staged delay is the visible feedback that the lift is working; don't "optimise" it by propagating activation instantly. Shutdown cascades the same way in reverse.
 
 **Completion latches per terrace and fires once.** A terrace is restored once ≥1 of its beds hits Boosted; latched terraces stay counted even if screws are later removed. Full completion fires **exactly once**, guarded by a `completed` flag.
 
