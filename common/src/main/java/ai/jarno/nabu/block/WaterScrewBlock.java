@@ -5,6 +5,7 @@ import ai.jarno.nabu.registry.NabuBlockEntities;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -70,5 +71,22 @@ public class WaterScrewBlock extends BaseEntityBlock {
         if (random.nextInt(3) == 0) {
             level.addParticle(ParticleTypes.BUBBLE, x, y, z, 0.0, 0.02, 0.0);
         }
+    }
+
+    /**
+     * Runs after the screw is already gone, which is exactly what nearby beds need: they can
+     * re-read the world and drop out of boosted without still seeing this block running.
+     */
+    @Override
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        int r = PlantingBedBlock.BOOST_RADIUS;
+        int h = PlantingBedBlock.BOOST_HEIGHT;
+        for (BlockPos candidate : BlockPos.betweenClosed(pos.offset(-r, -h, -r), pos.offset(r, h, r))) {
+            BlockState neighbour = level.getBlockState(candidate);
+            if (neighbour.getBlock() instanceof PlantingBedBlock) {
+                PlantingBedBlock.refresh(level, candidate.immutable(), neighbour);
+            }
+        }
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
     }
 }

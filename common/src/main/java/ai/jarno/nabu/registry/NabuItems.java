@@ -17,6 +17,24 @@ public final class NabuItems {
                     NabuBlocks.WATER_SCREW.get(),
                     new Item.Properties().setId(Nabu.key(Registries.ITEM, "water_screw"))));
 
+    public static final RegistrySupplier<Item> PLANTING_BED = ITEMS.register(
+            "planting_bed",
+            () -> new BlockItem(
+                    NabuBlocks.PLANTING_BED.get(),
+                    new Item.Properties().setId(Nabu.key(Registries.ITEM, "planting_bed"))));
+
+    /** Plantable seed. Placing it sows the crop. */
+    public static final RegistrySupplier<Item> SILPHIUM_SEEDS = ITEMS.register(
+            "silphium_seeds",
+            () -> new BlockItem(
+                    NabuBlocks.SILPHIUM.get(),
+                    new Item.Properties().setId(Nabu.key(Registries.ITEM, "silphium_seeds"))));
+
+    /** The harvest itself -- only obtainable from a crop that reached the fruiting stage. */
+    public static final RegistrySupplier<Item> SILPHIUM = ITEMS.register(
+            "silphium",
+            () -> new Item(new Item.Properties().setId(Nabu.key(Registries.ITEM, "silphium"))));
+
     private NabuItems() {
     }
 

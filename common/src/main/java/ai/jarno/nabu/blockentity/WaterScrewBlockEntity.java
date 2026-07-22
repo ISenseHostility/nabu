@@ -1,5 +1,6 @@
 package ai.jarno.nabu.blockentity;
 
+import ai.jarno.nabu.block.PlantingBedBlock;
 import ai.jarno.nabu.block.WaterScrewBlock;
 import ai.jarno.nabu.registry.NabuBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -90,13 +91,32 @@ public class WaterScrewBlockEntity extends BlockEntity {
         }
 
         level.setBlock(pos, state.setValue(WaterScrewBlock.RUNNING, true), Block.UPDATE_ALL);
+        refreshBedsInRange(level);
         setChanged();
     }
 
     private void deactivate(Level level, BlockPos pos, BlockState state) {
         clearPlacedSource(level);
         level.setBlock(pos, state.setValue(WaterScrewBlock.RUNNING, false), Block.UPDATE_ALL);
+        refreshBedsInRange(level);
         setChanged();
+    }
+
+    /**
+     * Push the new running state to nearby beds instead of having every bed poll for screws.
+     * Only ever runs on a start/stop transition, so the bounded scan stays rare.
+     */
+    private void refreshBedsInRange(Level level) {
+        int r = PlantingBedBlock.BOOST_RADIUS;
+        int h = PlantingBedBlock.BOOST_HEIGHT;
+        for (BlockPos candidate : BlockPos.betweenClosed(
+                worldPosition.offset(-r, -h, -r), worldPosition.offset(r, h, r))) {
+            BlockState state = level.getBlockState(candidate);
+            if (state.getBlock() instanceof PlantingBedBlock) {
+                // betweenClosed reuses one mutable position; beds must not capture it.
+                PlantingBedBlock.refresh(level, candidate.immutable(), state);
+            }
+        }
     }
 
     private void clearPlacedSource(Level level) {

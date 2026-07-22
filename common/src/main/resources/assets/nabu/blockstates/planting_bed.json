@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "tier=dry": {
+      "model": "nabu:block/planting_bed_dry"
+    },
+    "tier=watered": {
+      "model": "nabu:block/planting_bed_watered"
+    },
+    "tier=boosted": {
+      "model": "nabu:block/planting_bed_boosted"
+    }
+  }
+}

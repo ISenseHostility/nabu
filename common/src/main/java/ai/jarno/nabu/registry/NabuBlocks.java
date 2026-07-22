@@ -1,6 +1,8 @@
 package ai.jarno.nabu.registry;
 
 import ai.jarno.nabu.Nabu;
+import ai.jarno.nabu.block.ExtinctCropBlock;
+import ai.jarno.nabu.block.PlantingBedBlock;
 import ai.jarno.nabu.block.WaterScrewBlock;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -19,6 +21,17 @@ public final class NabuBlocks {
                     .strength(2.0F)
                     .noOcclusion()
                     .setId(Nabu.key(Registries.BLOCK, "water_screw"))));
+
+    public static final RegistrySupplier<PlantingBedBlock> PLANTING_BED = BLOCKS.register(
+            "planting_bed",
+            () -> new PlantingBedBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.FARMLAND)
+                    .randomTicks()
+                    .setId(Nabu.key(Registries.BLOCK, "planting_bed"))));
+
+    public static final RegistrySupplier<ExtinctCropBlock> SILPHIUM = BLOCKS.register(
+            "silphium",
+            () -> new ExtinctCropBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.WHEAT)
+                    .setId(Nabu.key(Registries.BLOCK, "silphium"))));
 
     private NabuBlocks() {
     }

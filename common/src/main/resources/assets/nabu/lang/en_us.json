@@ -1,3 +1,7 @@
 {
-  "block.nabu.water_screw": "Water Screw"
+  "block.nabu.water_screw": "Water Screw",
+  "block.nabu.planting_bed": "Planting Bed",
+  "block.nabu.silphium": "Silphium",
+  "item.nabu.silphium_seeds": "Silphium Seeds",
+  "item.nabu.silphium": "Silphium"
 }
