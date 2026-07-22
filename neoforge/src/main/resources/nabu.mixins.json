@@ -1,9 +1,8 @@
 {
   "required": true,
-  "package": "ai.jarno.nabu.fabric.mixin",
+  "package": "ai.jarno.nabu.neoforge.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
-    "AnimalMixin",
     "StructurePoolElementMixin"
   ],
   "injectors": {

@@ -30,6 +30,24 @@ public class PlantingBedBlockEntity extends BlockEntity {
         return controller != null && terrace != NO_TERRACE;
     }
 
+    /**
+     * Flagged by a worldgen data marker but not yet claimed by a controller. The shrine adopts
+     * these once it is ticking, which is why flagging and linking are separate steps.
+     */
+    public boolean isFlagged() {
+        return terrace != NO_TERRACE;
+    }
+
+    public int terrace() {
+        return terrace;
+    }
+
+    /** Called from worldgen. Marks this bed as part of the Wonder without linking it yet. */
+    public void flagAsWonderBed(int terraceIndex) {
+        this.terrace = terraceIndex;
+        setChanged();
+    }
+
     public void linkTo(BlockPos controllerPos, int terraceIndex) {
         this.controller = controllerPos;
         this.terrace = terraceIndex;

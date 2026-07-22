@@ -35,8 +35,19 @@ import java.util.Set;
  */
 public class GardenControllerBlockEntity extends BlockEntity {
     private static final int AURA_INTERVAL_TICKS = 20;
-    private static final int AURA_RADIUS = 8;
-    private static final int AURA_VERTICAL = 2;
+    private static final int ADOPT_INTERVAL_TICKS = 100;
+
+    /**
+     * Reach for finding beds. Wider than tall, and tall enough to look well above itself: the
+     * shrine stands at the reservoir while the beds it tracks sit on the terrace overhead.
+     */
+    public static final int REACH_HORIZONTAL = 16;
+    public static final int REACH_VERTICAL = 12;
+
+    // Reaches upward as well as outward, so a shrine standing at the reservoir still touches
+    // the terrace planting above it.
+    private static final int AURA_RADIUS = 12;
+    private static final int AURA_VERTICAL = 8;
     private static final int AURA_ATTEMPTS = 4;
     private static final float AURA_CHANCE = 0.25F;
 
@@ -132,8 +143,49 @@ public class GardenControllerBlockEntity extends BlockEntity {
         return live;
     }
 
+    /**
+     * Claim beds a worldgen marker flagged for us.
+     *
+     * <p>Jigsaw pieces are placed chunk by chunk, so bed pieces routinely land after the shrine
+     * does. Rather than have markers chase a controller that may not exist yet, the shrine keeps
+     * looking until it finds its beds and then stops.
+     */
+    private void adoptFlaggedBeds(Level level, BlockPos pos) {
+        int adopted = 0;
+        for (BlockPos candidate : BlockPos.betweenClosed(
+                pos.offset(-REACH_HORIZONTAL, -REACH_VERTICAL, -REACH_HORIZONTAL),
+                pos.offset(REACH_HORIZONTAL, REACH_VERTICAL, REACH_HORIZONTAL))) {
+            if (!(level.getBlockState(candidate).getBlock() instanceof PlantingBedBlock)
+                    || !(level.getBlockEntity(candidate) instanceof PlantingBedBlockEntity bed)) {
+                continue;
+            }
+            // Only marker-flagged beds, and only ones nobody has claimed yet.
+            if (!bed.isFlagged() || bed.isWonderBed()) {
+                continue;
+            }
+
+            BlockPos bedPos = candidate.immutable();
+            bed.linkTo(pos, bed.terrace());
+            registerBed(bed.terrace(), bedPos);
+            adopted++;
+
+            if (PlantingBedBlock.tierAt(level, bedPos) == BedTier.BOOSTED) {
+                bed.reportBoosted(level);
+            }
+        }
+        if (adopted > 0) {
+            Nabu.LOGGER.info("Shrine at {} adopted {} flagged bed(s).", pos, adopted);
+        }
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, GardenControllerBlockEntity garden) {
-        if (level.getGameTime() % AURA_INTERVAL_TICKS != 0L) {
+        long time = level.getGameTime();
+
+        if (garden.known.isEmpty() && time % ADOPT_INTERVAL_TICKS == 0L) {
+            garden.adoptFlaggedBeds(level, pos);
+        }
+
+        if (time % AURA_INTERVAL_TICKS != 0L) {
             return;
         }
 

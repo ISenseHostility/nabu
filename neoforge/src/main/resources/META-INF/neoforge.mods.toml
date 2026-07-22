@@ -25,6 +25,9 @@ versionRange = "[26.2,)"
 ordering = "NONE"
 side = "BOTH"
 
+[[mixins]]
+config = "nabu.mixins.json"
+
 [[dependencies.nabu]]
 modId = "architectury"
 type = "required"

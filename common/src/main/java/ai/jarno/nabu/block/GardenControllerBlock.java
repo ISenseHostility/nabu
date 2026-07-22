@@ -31,8 +31,8 @@ public class GardenControllerBlock extends BaseEntityBlock {
     /** Live state, not the permanent unlock: true while at least one bed is currently boosted. */
     public static final BooleanProperty POWERED = BooleanProperty.create("powered");
 
-    /** Reach of the manual survey described in {@link #useWithoutItem}. */
-    private static final int SURVEY_RADIUS = 8;
+    private static final int SURVEY_RADIUS_HORIZONTAL = GardenControllerBlockEntity.REACH_HORIZONTAL;
+    private static final int SURVEY_RADIUS_VERTICAL = GardenControllerBlockEntity.REACH_VERTICAL;
 
     public GardenControllerBlock(Properties properties) {
         super(properties);
@@ -107,8 +107,8 @@ public class GardenControllerBlock extends BaseEntityBlock {
     private static int survey(Level level, BlockPos pos, GardenControllerBlockEntity controller) {
         int adopted = 0;
         for (BlockPos candidate : BlockPos.betweenClosed(
-                pos.offset(-SURVEY_RADIUS, -SURVEY_RADIUS, -SURVEY_RADIUS),
-                pos.offset(SURVEY_RADIUS, SURVEY_RADIUS, SURVEY_RADIUS))) {
+                pos.offset(-SURVEY_RADIUS_HORIZONTAL, -SURVEY_RADIUS_VERTICAL, -SURVEY_RADIUS_HORIZONTAL),
+                pos.offset(SURVEY_RADIUS_HORIZONTAL, SURVEY_RADIUS_VERTICAL, SURVEY_RADIUS_HORIZONTAL))) {
             if (!(level.getBlockState(candidate).getBlock() instanceof PlantingBedBlock)) {
                 continue;
             }
