@@ -11,4 +11,18 @@ public class WaterScrewRenderState extends BlockEntityRenderState {
     public boolean running;
     /** Absolute helix angle in degrees, already interpolated for the current frame. */
     public float spin;
+    /**
+     * Charge as a fraction, 0 dry to 1 primed. Drives the water's height and the spin speed
+     * together, so the screw visibly winds up as the water climbs inside it.
+     */
+    public float fill;
+    /** Upward texture offset in sprite heights. Only the fractional part is used. */
+    public float scroll;
+    /** Packed ARGB: biome water colour, so the column matches the water around it. */
+    public int waterColor;
+    /**
+     * Water sits directly on this column's surface, so the surface is an internal seam and gets
+     * dropped -- the same reason glass does not draw the face between two glass blocks.
+     */
+    public boolean capped;
 }
