@@ -25,4 +25,9 @@ public class WaterScrewRenderState extends BlockEntityRenderState {
      * dropped -- the same reason glass does not draw the face between two glass blocks.
      */
     public boolean capped;
+    /**
+     * How far the column reaches below its block to meet the water feeding it. Vanilla renders
+     * a source under a non-water block short of full height, and the screw is not water.
+     */
+    public float skirt;
 }

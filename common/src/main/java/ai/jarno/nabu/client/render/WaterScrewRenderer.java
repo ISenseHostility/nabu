@@ -25,6 +25,7 @@ import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -108,6 +109,7 @@ public class WaterScrewRenderer implements BlockEntityRenderer<WaterScrewBlockEn
             state.fill = 0.0F;
             state.scroll = 0.0F;
             state.capped = false;
+            state.skirt = 0.0F;
             state.waterColor = (WATER_ALPHA << 24) | DEFAULT_WATER_RGB;
             return;
         }
@@ -123,6 +125,7 @@ public class WaterScrewRenderer implements BlockEntityRenderer<WaterScrewBlockEn
         // Only a brimming column reaches the block boundary; a partly filled one has its own
         // air above it and keeps its surface however wet the block overhead is.
         state.capped = state.fill >= FULL && waterAbove(level, screw.getBlockPos(), partialTicks);
+        state.skirt = skirtBelow(level, screw.getBlockPos());
     }
 
     @Override
@@ -140,8 +143,9 @@ public class WaterScrewRenderer implements BlockEntityRenderer<WaterScrewBlockEn
             int color = state.waterColor;
             int light = state.lightCoords;
             boolean capped = state.capped;
+            float skirt = state.skirt;
             collector.submitCustomGeometry(poseStack, WATER_TYPE, (pose, consumer) ->
-                    WaterColumn.emit(pose, consumer, waterSprite, fill, scroll, color, light, capped));
+                    WaterColumn.emit(pose, consumer, waterSprite, fill, scroll, color, light, capped, skirt));
         }
 
         poseStack.pushPose();
@@ -171,6 +175,23 @@ public class WaterScrewRenderer implements BlockEntityRenderer<WaterScrewBlockEn
         }
         return level.getBlockEntity(above) instanceof WaterScrewBlockEntity screw
                 && screw.charge(partialTicks) > 0.0F;
+    }
+
+    /**
+     * How far the water feeding this screw falls short of the block boundary.
+     *
+     * <p>Vanilla renders a source below full height unless the block above it holds the same
+     * fluid, and a screw does not. Left alone that leaves a visible band of air between the
+     * reservoir's surface and the foot of the column, so the column reaches down to meet it.
+     * Measured rather than assumed to be 8/9, so flowing water lines up too.
+     */
+    private static float skirtBelow(Level level, BlockPos pos) {
+        BlockPos below = pos.below();
+        FluidState fluid = level.getFluidState(below);
+        if (!fluid.isSourceOfType(Fluids.WATER)) {
+            return 0.0F;
+        }
+        return Math.max(0.0F, 1.0F - fluid.getHeight(level, below));
     }
 
     private static int waterColor(Level level, BlockPos pos) {

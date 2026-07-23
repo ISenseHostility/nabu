@@ -23,6 +23,12 @@ public final class WaterColumn {
      */
     private static final float INSET = 0.002F;
 
+    /**
+     * Ceiling on the band walk. A full block plus its skirt spans at most two sprite seams;
+     * this only exists so a degenerate scroll value can never spin the loop.
+     */
+    private static final int MAX_BANDS = 4;
+
     private WaterColumn() {
     }
 
@@ -33,6 +39,9 @@ public final class WaterColumn {
      * @param capped water rests on this column's surface, so the surface is dropped as an
      *               internal seam -- without it a stacked screw shows the column below's
      *               surface floating through its own water
+     * @param skirt  how far to reach below the block. Vanilla draws a water source under a
+     *               non-water block short of full height, and without bridging that the column
+     *               visibly hangs above the reservoir feeding it
      */
     public static void emit(
             PoseStack.Pose pose,
@@ -42,25 +51,32 @@ public final class WaterColumn {
             float scroll,
             int color,
             int light,
-            boolean capped) {
+            boolean capped,
+            float skirt) {
         if (height <= 0.0F) {
             return;
         }
 
+        float bottom = -skirt;
         // v grows downward through the sprite, so advancing it with the clock walks the pattern
-        // up the column. The surface sits at vTop and the floor a full column-height below it.
-        float wrapped = scroll - (float) Math.floor(scroll);
-        float vTop = wrapped;
-        float vBottom = wrapped + height;
+        // up the column.
+        float v = scroll - (float) Math.floor(scroll);
 
-        if (vBottom <= 1.0F) {
-            band(pose, consumer, sprite, 0.0F, height, vBottom, vTop, color, light);
-        } else {
-            // The seam lands inside the column. Split where v crosses the sprite's bottom edge
-            // and restart the lower band from the top of the sprite.
-            float seam = vBottom - 1.0F;
-            band(pose, consumer, sprite, seam, height, 1.0F, vTop, color, light);
-            band(pose, consumer, sprite, 0.0F, seam, seam, 0.0F, color, light);
+        // Walk down from the surface a band at a time, restarting at the top of the sprite each
+        // time v runs off its bottom edge. A loop rather than a one-seam special case: the skirt
+        // can push the run past a whole sprite height, so there may be more than one seam.
+        float y = height;
+        for (int bandIndex = 0; y > bottom && bandIndex < MAX_BANDS; bandIndex++) {
+            if (v >= 1.0F) {
+                v -= 1.0F;
+            }
+            float step = Math.min(1.0F - v, y - bottom);
+            if (step <= 0.0F) {
+                break;
+            }
+            band(pose, consumer, sprite, y - step, y, v + step, v, color, light);
+            y -= step;
+            v += step;
         }
 
         if (!capped) {
