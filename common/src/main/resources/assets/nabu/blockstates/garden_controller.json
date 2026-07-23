@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "powered=false": {
       "model": "nabu:block/garden_controller"
+    },
+    "powered=true": {
+      "model": "nabu:block/garden_controller_filled"
     }
   }
 }
