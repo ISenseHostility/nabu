@@ -30,4 +30,21 @@ public class WaterScrewRenderState extends BlockEntityRenderState {
      * a source under a non-water block short of full height, and the screw is not water.
      */
     public float skirt;
+    /**
+     * Bitmask of the column's four sides that face something other than water, and so are worth
+     * drawing. A face shared with water is an internal seam, dropped for the same reason the
+     * surface is when something wet rests on it.
+     */
+    public int openSides;
+    /**
+     * Same mask as {@link #openSides} but for the skirt, tested against the water beside the
+     * block below rather than beside the screw. Falling water there covers the skirt and culls
+     * it; a reservoir source warps down and leaves it open.
+     */
+    public int skirtSides;
+    /**
+     * Height the column is actually drawn to. Follows {@link #fill}, except that a brimming
+     * column beside a pond drops to the pond's surface rather than standing proud of it.
+     */
+    public float surface;
 }

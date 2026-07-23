@@ -29,6 +29,12 @@ public final class WaterColumn {
      */
     private static final int MAX_BANDS = 4;
 
+    public static final int NORTH = 1;
+    public static final int SOUTH = 1 << 1;
+    public static final int WEST = 1 << 2;
+    public static final int EAST = 1 << 3;
+    public static final int ALL_SIDES = NORTH | SOUTH | WEST | EAST;
+
     private WaterColumn() {
     }
 
@@ -42,6 +48,11 @@ public final class WaterColumn {
      * @param skirt  how far to reach below the block. Vanilla draws a water source under a
      *               non-water block short of full height, and without bridging that the column
      *               visibly hangs above the reservoir feeding it
+     * @param openSides  sides of the in-block column not covered by water beside the screw
+     * @param skirtSides sides of the skirt not covered by water beside the block below. Distinct
+     *                   from {@code openSides}: falling water pins the block below to full height
+     *                   and covers the skirt, but a reservoir source warps down and leaves its
+     *                   sides open, so the skirt keeps them
      */
     public static void emit(
             PoseStack.Pose pose,
@@ -52,7 +63,9 @@ public final class WaterColumn {
             int color,
             int light,
             boolean capped,
-            float skirt) {
+            float skirt,
+            int openSides,
+            int skirtSides) {
         if (height <= 0.0F) {
             return;
         }
@@ -71,10 +84,19 @@ public final class WaterColumn {
                 v -= 1.0F;
             }
             float step = Math.min(1.0F - v, y - bottom);
+            // Split at the block floor too. Below it lies the skirt, which sits in the air the
+            // water below leaves under its own warped surface -- so it keeps every side, even
+            // where the column itself is dropping them against a neighbour.
+            if (y > 0.0F && y - step < 0.0F) {
+                step = y;
+            }
             if (step <= 0.0F) {
                 break;
             }
-            band(pose, consumer, sprite, y - step, y, v + step, v, color, light);
+            // In-block bands cull against the water beside the screw; skirt bands, which hang in
+            // the block below, cull against the water beside that one instead.
+            band(pose, consumer, sprite, y - step, y, v + step, v, color, light,
+                    y > 0.0F ? openSides : skirtSides);
             y -= step;
             v += step;
         }
@@ -94,40 +116,52 @@ public final class WaterColumn {
             float vBottomNorm,
             float vTopNorm,
             int color,
-            int light) {
+            int light,
+            int sides) {
         if (yTop <= yBottom) {
             return;
         }
 
         float a = INSET;
         float b = 1.0F - INSET;
-        float u0 = sprite.getU0();
-        float u1 = sprite.getU1();
-        float vB = v(sprite, vBottomNorm);
-        float vT = v(sprite, vTopNorm);
+        // Turned a quarter turn: the coordinate walking with the scroll runs along the sprite's
+        // U axis and the one running across the face along its V. Both stay inside the sprite's
+        // own slice of the atlas, so the wrap handling above is unaffected by the rotation.
+        float u0 = u(sprite, vBottomNorm);
+        float u1 = u(sprite, vTopNorm);
+        float vB = sprite.getV0();
+        float vT = sprite.getV1();
 
         // Wound counter-clockwise as seen from outside the block, so back faces cull away and
         // the translucent sides never blend over each other.
-        quad(pose, consumer, color, light, 0.0F, 0.0F, -1.0F,
-                b, yBottom, a, u0, vB,
-                a, yBottom, a, u1, vB,
-                a, yTop, a, u1, vT,
-                b, yTop, a, u0, vT);
-        quad(pose, consumer, color, light, 0.0F, 0.0F, 1.0F,
-                a, yBottom, b, u0, vB,
-                b, yBottom, b, u1, vB,
-                b, yTop, b, u1, vT,
-                a, yTop, b, u0, vT);
-        quad(pose, consumer, color, light, -1.0F, 0.0F, 0.0F,
-                a, yBottom, a, u0, vB,
-                a, yBottom, b, u1, vB,
-                a, yTop, b, u1, vT,
-                a, yTop, a, u0, vT);
-        quad(pose, consumer, color, light, 1.0F, 0.0F, 0.0F,
-                b, yBottom, b, u0, vB,
-                b, yBottom, a, u1, vB,
-                b, yTop, a, u1, vT,
-                b, yTop, b, u0, vT);
+        if ((sides & NORTH) != 0) {
+            quad(pose, consumer, color, light, 0.0F, 0.0F, -1.0F,
+                    b, yBottom, a, u0, vB,
+                    a, yBottom, a, u0, vT,
+                    a, yTop, a, u1, vT,
+                    b, yTop, a, u1, vB);
+        }
+        if ((sides & SOUTH) != 0) {
+            quad(pose, consumer, color, light, 0.0F, 0.0F, 1.0F,
+                    a, yBottom, b, u0, vB,
+                    b, yBottom, b, u0, vT,
+                    b, yTop, b, u1, vT,
+                    a, yTop, b, u1, vB);
+        }
+        if ((sides & WEST) != 0) {
+            quad(pose, consumer, color, light, -1.0F, 0.0F, 0.0F,
+                    a, yBottom, a, u0, vB,
+                    a, yBottom, b, u0, vT,
+                    a, yTop, b, u1, vT,
+                    a, yTop, a, u1, vB);
+        }
+        if ((sides & EAST) != 0) {
+            quad(pose, consumer, color, light, 1.0F, 0.0F, 0.0F,
+                    b, yBottom, b, u0, vB,
+                    b, yBottom, a, u0, vT,
+                    b, yTop, a, u1, vT,
+                    b, yTop, b, u1, vB);
+        }
     }
 
     /**
@@ -150,8 +184,9 @@ public final class WaterColumn {
                 b, y, a, sprite.getU1(), sprite.getV0());
     }
 
-    private static float v(TextureAtlasSprite sprite, float t) {
-        return sprite.getV0() + (sprite.getV1() - sprite.getV0()) * t;
+    /** Maps a 0-1 position onto the sprite's own slice of the atlas, never past its edges. */
+    private static float u(TextureAtlasSprite sprite, float t) {
+        return sprite.getU0() + (sprite.getU1() - sprite.getU0()) * t;
     }
 
     private static void quad(
