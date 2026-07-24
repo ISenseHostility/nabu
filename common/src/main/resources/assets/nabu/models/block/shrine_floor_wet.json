@@ -1,0 +1,6 @@
+{
+  "parent": "nabu:block/shrine_floor",
+  "textures": {
+    "inside": "nabu:block/shrine_basin_wet"
+  }
+}
