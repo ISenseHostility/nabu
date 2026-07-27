@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -20,6 +21,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -34,6 +38,23 @@ public class GardenControllerBlock extends BaseEntityBlock {
     private static final int SURVEY_RADIUS_HORIZONTAL = GardenControllerBlockEntity.REACH_HORIZONTAL;
     private static final int SURVEY_RADIUS_VERTICAL = GardenControllerBlockEntity.REACH_VERTICAL;
 
+    /**
+     * Traces the font silhouette rather than a full cube, so the selection outline follows the
+     * stepped plinth and nobody bumps invisible air at the waist. Kept in step with
+     * {@code assets/nabu/models/block/shrine_shell.json} -- the basin interior is deliberately
+     * solid here, so the rim is something you can stand on.
+     */
+    private static final VoxelShape SHAPE = Shapes.or(
+            Block.box(0, 0, 0, 16, 2, 16),      // base course
+            Block.box(1, 2, 1, 15, 4, 15),      // first step
+            Block.box(3, 4, 3, 13, 7, 13),      // waist
+            Block.box(1, 7, 1, 15, 9, 15),      // corbel
+            Block.box(0, 9, 0, 16, 14, 16),     // basin floor and rim
+            Block.box(0, 14, 0, 3, 16, 3),      // corner caps
+            Block.box(13, 14, 0, 16, 16, 3),
+            Block.box(0, 14, 13, 3, 16, 16),
+            Block.box(13, 14, 13, 16, 16, 16));
+
     public GardenControllerBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(POWERED, false));
@@ -47,6 +68,11 @@ public class GardenControllerBlock extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(POWERED);
+    }
+
+    @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return SHAPE;
     }
 
     @Override

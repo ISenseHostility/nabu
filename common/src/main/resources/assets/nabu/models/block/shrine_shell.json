@@ -1,0 +1,228 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "nabu:block/shrine",
+    "side": "nabu:block/shrine",
+    "top": "nabu:block/shrine",
+    "bottom": "nabu:block/shrine"
+  },
+  "elements": [
+    {
+      "__comment": "Base course. Widest thing here, so it carries the down/side cullfaces.",
+      "from": [0, 0, 0],
+      "to": [16, 2, 16],
+      "faces": {
+        "down": {"texture": "#bottom", "cullface": "down"},
+        "up": {"texture": "#top"},
+        "north": {"texture": "#side", "cullface": "north"},
+        "south": {"texture": "#side", "cullface": "south"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "east": {"texture": "#side", "cullface": "east"}
+      }
+    },
+    {
+      "__comment": "First step in. Leaves a 1px ledge of the base course showing.",
+      "from": [1, 2, 1],
+      "to": [15, 4, 15],
+      "faces": {
+        "up": {"texture": "#top"},
+        "north": {"texture": "#side"},
+        "south": {"texture": "#side"},
+        "west": {"texture": "#side"},
+        "east": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Waist. The pinch that makes this a font rather than a box.",
+      "from": [3, 4, 3],
+      "to": [13, 7, 13],
+      "faces": {
+        "north": {"texture": "#side"},
+        "south": {"texture": "#side"},
+        "west": {"texture": "#side"},
+        "east": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Corbel, flaring back out. Its underside overhangs the waist by 2px.",
+      "from": [1, 7, 1],
+      "to": [15, 9, 15],
+      "faces": {
+        "down": {"texture": "#bottom"},
+        "north": {"texture": "#side"},
+        "south": {"texture": "#side"},
+        "west": {"texture": "#side"},
+        "east": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Rim, north. Walls run y10-14; the basin floor slab below them is its own model.",
+      "from": [0, 10, 0],
+      "to": [16, 14, 2],
+      "faces": {
+        "up": {"texture": "#top"},
+        "north": {"texture": "#side", "cullface": "north"},
+        "south": {"texture": "#side"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "east": {"texture": "#side", "cullface": "east"}
+      }
+    },
+    {
+      "__comment": "Rim, south.",
+      "from": [0, 10, 14],
+      "to": [16, 14, 16],
+      "faces": {
+        "up": {"texture": "#top"},
+        "north": {"texture": "#side"},
+        "south": {"texture": "#side", "cullface": "south"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "east": {"texture": "#side", "cullface": "east"}
+      }
+    },
+    {
+      "__comment": "Rim, west.",
+      "from": [0, 10, 2],
+      "to": [2, 14, 14],
+      "faces": {
+        "up": {"texture": "#top"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "east": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Rim, east.",
+      "from": [14, 10, 2],
+      "to": [16, 14, 14],
+      "faces": {
+        "up": {"texture": "#top"},
+        "west": {"texture": "#side"},
+        "east": {"texture": "#side", "cullface": "east"}
+      }
+    },
+    {
+      "__comment": "Chamfer blade, north-west. Rotated 45deg so the square opening reads as an octagon that hugs the painted circle. Inner face lands on x+z=7, 6.36px from centre; the circle's radius is ~6, so it clears. Both outer tips finish inside the rim walls. Top sits 0.1px BELOW the y=14 rim: the blades have to overlap the walls (a diagonal seam cannot be tiled by axis-aligned boxes), so the tops are separated in depth rather than left coplanar and z-fighting. Recessed rather than proud so the seam reads as a masonry joint instead of catching light like a raised lip. 0.1px is 1/160 of a block -- a tenth of a texel -- but ~50x the depth precision at normal viewing range.",
+      "from": [1, 10, 1],
+      "to": [6, 13.9, 3.5],
+      "rotation": {"origin": [3.5, 10, 3.5], "axis": "y", "angle": 45},
+      "faces": {
+        "up": {"texture": "#top"},
+        "south": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Chamfer blade, north-east. Same 0.1px recess on the top as the north-west blade.",
+      "from": [10, 10, 1],
+      "to": [15, 13.9, 3.5],
+      "rotation": {"origin": [12.5, 10, 3.5], "axis": "y", "angle": -45},
+      "faces": {
+        "up": {"texture": "#top"},
+        "south": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Chamfer blade, south-west. Same 0.1px recess on the top as the north-west blade.",
+      "from": [1, 10, 12.5],
+      "to": [6, 13.9, 15],
+      "rotation": {"origin": [3.5, 10, 12.5], "axis": "y", "angle": -45},
+      "faces": {
+        "up": {"texture": "#top"},
+        "north": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Chamfer blade, south-east. Same 0.1px recess on the top as the north-west blade.",
+      "from": [10, 10, 12.5],
+      "to": [15, 13.9, 15],
+      "rotation": {"origin": [12.5, 10, 12.5], "axis": "y", "angle": 45},
+      "faces": {
+        "up": {"texture": "#top"},
+        "north": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Cap footing, north-west. The rim walls hold up all of the cap above except the 1x1 at x2-3/z2-3, which only the chamfer blade reached -- and the blade now stops 0.1px short. This packs that band so the recess cannot be seen through from inside the basin. Only the two basin-facing sides are drawn; the rest is buried in the walls, the blade, or the cap.",
+      "from": [2, 13.9, 2],
+      "to": [3, 14, 3],
+      "faces": {
+        "south": {"texture": "#side"},
+        "east": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Cap footing, north-east.",
+      "from": [13, 13.9, 2],
+      "to": [14, 14, 3],
+      "faces": {
+        "south": {"texture": "#side"},
+        "west": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Cap footing, south-west.",
+      "from": [2, 13.9, 13],
+      "to": [3, 14, 14],
+      "faces": {
+        "north": {"texture": "#side"},
+        "east": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Cap footing, south-east.",
+      "from": [13, 13.9, 13],
+      "to": [14, 14, 14],
+      "faces": {
+        "north": {"texture": "#side"},
+        "west": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Corner cap, north-west. The four caps rise 2px past the rim and give the silhouette its pilasters. Each sits on the rim walls plus its footing, so no down face.",
+      "from": [0, 14, 0],
+      "to": [3, 16, 3],
+      "faces": {
+        "up": {"texture": "#top", "cullface": "up"},
+        "north": {"texture": "#side", "cullface": "north"},
+        "south": {"texture": "#side"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "east": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Corner cap, north-east.",
+      "from": [13, 14, 0],
+      "to": [16, 16, 3],
+      "faces": {
+        "up": {"texture": "#top", "cullface": "up"},
+        "north": {"texture": "#side", "cullface": "north"},
+        "south": {"texture": "#side"},
+        "west": {"texture": "#side"},
+        "east": {"texture": "#side", "cullface": "east"}
+      }
+    },
+    {
+      "__comment": "Corner cap, south-west.",
+      "from": [0, 14, 13],
+      "to": [3, 16, 16],
+      "faces": {
+        "up": {"texture": "#top", "cullface": "up"},
+        "north": {"texture": "#side"},
+        "south": {"texture": "#side", "cullface": "south"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "east": {"texture": "#side"}
+      }
+    },
+    {
+      "__comment": "Corner cap, south-east.",
+      "from": [13, 14, 13],
+      "to": [16, 16, 16],
+      "faces": {
+        "up": {"texture": "#top", "cullface": "up"},
+        "north": {"texture": "#side"},
+        "south": {"texture": "#side", "cullface": "south"},
+        "west": {"texture": "#side"},
+        "east": {"texture": "#side", "cullface": "east"}
+      }
+    }
+  ]
+}
