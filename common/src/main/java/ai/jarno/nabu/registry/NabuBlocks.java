@@ -38,6 +38,7 @@ public final class NabuBlocks {
             "garden_controller",
             () -> new GardenControllerBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.CHISELED_STONE_BRICKS)
                     .strength(3.0F)
+                    .noOcclusion()
                     .setId(Nabu.key(Registries.BLOCK, "garden_controller"))));
 
     private NabuBlocks() {

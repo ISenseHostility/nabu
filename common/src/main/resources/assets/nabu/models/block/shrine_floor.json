@@ -1,0 +1,24 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "nabu:block/shrine",
+    "side": "nabu:block/shrine",
+    "bottom": "nabu:block/shrine"
+  },
+  "elements": [
+    {
+      "__comment": "Basin floor. Full 16x16 so the painted bowl maps 1:1 onto the up face; the 2px rim above hides the frame ring the sprite draws around it. Overhangs the corbel by 1px as a drip lip. Subclassed to swap #inside between dry and wet.",
+      "from": [0, 9, 0],
+      "to": [16, 10, 16],
+      "faces": {
+        "down": {"texture": "#bottom"},
+        "up": {"texture": "#inside"},
+        "north": {"texture": "#side", "cullface": "north"},
+        "south": {"texture": "#side", "cullface": "south"},
+        "west": {"texture": "#side", "cullface": "west"},
+        "east": {"texture": "#side", "cullface": "east"}
+      }
+    }
+  ]
+}

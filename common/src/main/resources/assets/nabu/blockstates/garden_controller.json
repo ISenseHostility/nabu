@@ -1,7 +1,19 @@
 {
-  "variants": {
-    "": {
-      "model": "nabu:block/garden_controller"
+  "multipart": [
+    {
+      "apply": {"model": "nabu:block/shrine_shell"}
+    },
+    {
+      "when": {"powered": "false"},
+      "apply": {"model": "nabu:block/shrine_floor_dry"}
+    },
+    {
+      "when": {"powered": "true"},
+      "apply": {"model": "nabu:block/shrine_floor_wet"}
+    },
+    {
+      "when": {"powered": "true"},
+      "apply": {"model": "nabu:block/shrine_water"}
     }
-  }
+  ]
 }
