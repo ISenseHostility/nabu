@@ -44,9 +44,23 @@ public final class NabuBlocks {
             () -> new EmmerBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.WHEAT)
                     .setId(Nabu.key(Registries.BLOCK, "emmer"))));
 
+    /**
+     * Copies {@link Blocks#PITCHER_CROP}, not {@code WHEAT}, and must keep doing so.
+     *
+     * <p>Wheat's properties carry a state-dependent map colour -- it reads
+     * {@code CropBlock.AGE} to turn yellow when nearly ripe -- and
+     * {@code ofLegacyCopy} copies that function along with everything else. This block is a
+     * {@code DoublePlantBlock} with {@code AGE_4}, not a {@code CropBlock} with
+     * {@code AGE_7}, so evaluating that function while building the state definition throws
+     * and takes the whole game down at registration.
+     *
+     * <p>Pitcher crop is the block this one is modelled on, shares its exact state shape
+     * ({@code AGE_4} plus {@code HALF}), and carries no state-dependent properties at all.
+     * Silphium and Emmer may safely copy wheat because they really are {@code CropBlock}s.
+     */
     public static final RegistrySupplier<JudeanDateBlock> JUDEAN_DATE = BLOCKS.register(
             "judean_date",
-            () -> new JudeanDateBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.WHEAT)
+            () -> new JudeanDateBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.PITCHER_CROP)
                     .setId(Nabu.key(Registries.BLOCK, "judean_date"))));
 
     public static final RegistrySupplier<GardenControllerBlock> GARDEN_CONTROLLER = BLOCKS.register(
