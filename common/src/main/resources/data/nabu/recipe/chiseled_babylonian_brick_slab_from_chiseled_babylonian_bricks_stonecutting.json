@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "nabu:chiseled_babylonian_bricks",
+  "result": {
+    "count": 2,
+    "id": "nabu:chiseled_babylonian_brick_slab"
+  }
+}

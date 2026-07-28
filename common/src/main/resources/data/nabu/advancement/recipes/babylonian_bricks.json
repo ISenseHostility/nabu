@@ -1,0 +1,58 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_babylonian_bricks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#nabu:babylonian_bricks"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_babylonian_bricks"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "nabu:babylonian_brick_slab",
+      "nabu:babylonian_brick_slab_from_babylonian_bricks_stonecutting",
+      "nabu:babylonian_brick_stairs",
+      "nabu:babylonian_brick_stairs_from_babylonian_bricks_stonecutting",
+      "nabu:babylonian_brick_wall",
+      "nabu:babylonian_brick_wall_from_babylonian_bricks_stonecutting",
+      "nabu:babylonian_tile_slab",
+      "nabu:babylonian_tile_slab_from_babylonian_bricks_stonecutting",
+      "nabu:babylonian_tile_slab_from_babylonian_tiles_stonecutting",
+      "nabu:babylonian_tile_stairs",
+      "nabu:babylonian_tile_stairs_from_babylonian_bricks_stonecutting",
+      "nabu:babylonian_tile_stairs_from_babylonian_tiles_stonecutting",
+      "nabu:babylonian_tile_wall",
+      "nabu:babylonian_tile_wall_from_babylonian_bricks_stonecutting",
+      "nabu:babylonian_tile_wall_from_babylonian_tiles_stonecutting",
+      "nabu:babylonian_tiles_from_babylonian_bricks_stonecutting",
+      "nabu:chiseled_babylonian_brick_slab",
+      "nabu:chiseled_babylonian_brick_slab_from_babylonian_bricks_stonecutting",
+      "nabu:chiseled_babylonian_brick_slab_from_chiseled_babylonian_bricks_stonecutting",
+      "nabu:chiseled_babylonian_brick_stairs",
+      "nabu:chiseled_babylonian_brick_stairs_from_babylonian_bricks_stonecutting",
+      "nabu:chiseled_babylonian_brick_stairs_from_chiseled_babylonian_bricks_stonecutting",
+      "nabu:chiseled_babylonian_brick_wall",
+      "nabu:chiseled_babylonian_brick_wall_from_babylonian_bricks_stonecutting",
+      "nabu:chiseled_babylonian_brick_wall_from_chiseled_babylonian_bricks_stonecutting",
+      "nabu:chiseled_babylonian_bricks",
+      "nabu:chiseled_babylonian_bricks_from_babylonian_bricks_stonecutting",
+      "nabu:cracked_babylonian_brick_slab",
+      "nabu:cracked_babylonian_brick_slab_from_cracked_babylonian_bricks_stonecutting",
+      "nabu:cracked_babylonian_brick_stairs",
+      "nabu:cracked_babylonian_brick_stairs_from_cracked_babylonian_bricks_stonecutting",
+      "nabu:cracked_babylonian_brick_wall",
+      "nabu:cracked_babylonian_brick_wall_from_cracked_babylonian_bricks_stonecutting",
+      "nabu:cracked_babylonian_bricks"
+    ]
+  }
+}
