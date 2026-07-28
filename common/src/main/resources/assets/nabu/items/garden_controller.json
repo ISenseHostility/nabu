@@ -1,6 +1,15 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "nabu:block/garden_controller"
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:model",
+        "model": "nabu:block/shrine_shell"
+      },
+      {
+        "type": "minecraft:model",
+        "model": "nabu:block/shrine_floor_dry"
+      }
+    ]
   }
 }

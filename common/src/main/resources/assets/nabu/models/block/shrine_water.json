@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "nabu:block/shrine",
+    "water": "minecraft:block/water_still"
+  },
+  "elements": [
+    {
+      "__comment": "Awakened water surface, 3px above the floor and 1px below the rim. Square 2..14 on purpose: its corners fall inside the solid chamfer blades, so they are occluded rather than poking through, and no octagonal plane is needed. tintindex 0 over the greyscale sprite picks up the biome water colour, the same arrangement as a filled cauldron.",
+      "from": [2, 12, 2],
+      "to": [14, 13, 14],
+      "light_emission": 15,
+      "faces": {
+        "up": {"texture": "#water", "tintindex": 0}
+      }
+    }
+  ]
+}
