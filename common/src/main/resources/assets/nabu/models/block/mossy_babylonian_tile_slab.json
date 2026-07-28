@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "nabu:block/mossy_babylonian_tiles",
+    "side": "nabu:block/mossy_babylonian_tiles",
+    "top": "nabu:block/mossy_babylonian_tiles"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "glazed_babylonian_bricks",
+  "ingredients": [
+    "nabu:babylonian_bricks",
+    "minecraft:lapis_lazuli"
+  ],
+  "result": {
+    "id": "nabu:glazed_babylonian_bricks"
+  }
+}
