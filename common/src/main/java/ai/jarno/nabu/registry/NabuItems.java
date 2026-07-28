@@ -43,6 +43,18 @@ public final class NabuItems {
             "silphium",
             () -> new Item(tabbed().setId(Nabu.key(Registries.ITEM, "silphium"))));
 
+    /** Plantable seed. Placing it sows the crop. */
+    public static final RegistrySupplier<Item> EMMER_SEEDS = ITEMS.register(
+            "emmer_seeds",
+            () -> new BlockItem(
+                    NabuBlocks.EMMER.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "emmer_seeds"))));
+
+    /** The grain itself -- reserved as a crafting ingredient, no use yet. */
+    public static final RegistrySupplier<Item> EMMER = ITEMS.register(
+            "emmer",
+            () -> new Item(tabbed().setId(Nabu.key(Registries.ITEM, "emmer"))));
+
     /**
      * One-time trophy for restoring the Gardens. Carried in the offhand, it makes breeding
      * animals occasionally bear more than one young.
