@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_wall_side_tall",
+  "textures": {
+    "wall": "nabu:block/mossy_babylonian_bricks"
+  }
+}

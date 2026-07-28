@@ -117,6 +117,7 @@ public final class NabuItems {
         // land after the Wonder's own items in the creative tab.
         blockItems(NabuBlocks.BABYLONIAN_BRICKS);
         blockItems(NabuBlocks.CRACKED_BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.MOSSY_BABYLONIAN_BRICKS);
         blockItems(NabuBlocks.BABYLONIAN_TILES);
         blockItems(NabuBlocks.CHISELED_BABYLONIAN_BRICKS);
         ITEMS.register();

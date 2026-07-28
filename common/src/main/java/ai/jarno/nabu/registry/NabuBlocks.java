@@ -62,6 +62,9 @@ public final class NabuBlocks {
     public static final BrickSet CRACKED_BABYLONIAN_BRICKS =
             brickSet("cracked_babylonian_bricks", "cracked_babylonian_brick");
 
+    public static final BrickSet MOSSY_BABYLONIAN_BRICKS =
+            brickSet("mossy_babylonian_bricks", "mossy_babylonian_brick");
+
     public static final BrickSet BABYLONIAN_TILES =
             brickSet("babylonian_tiles", "babylonian_tile");
 

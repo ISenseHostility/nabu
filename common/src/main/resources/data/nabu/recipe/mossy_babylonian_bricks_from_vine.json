@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "mossy_babylonian_bricks",
+  "ingredients": [
+    "nabu:babylonian_bricks",
+    "minecraft:vine"
+  ],
+  "result": {
+    "id": "nabu:mossy_babylonian_bricks"
+  }
+}

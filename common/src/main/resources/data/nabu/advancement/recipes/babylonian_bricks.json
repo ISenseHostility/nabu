@@ -52,7 +52,15 @@
       "nabu:cracked_babylonian_brick_stairs_from_cracked_babylonian_bricks_stonecutting",
       "nabu:cracked_babylonian_brick_wall",
       "nabu:cracked_babylonian_brick_wall_from_cracked_babylonian_bricks_stonecutting",
-      "nabu:cracked_babylonian_bricks"
+      "nabu:cracked_babylonian_bricks",
+      "nabu:mossy_babylonian_brick_slab",
+      "nabu:mossy_babylonian_brick_slab_from_mossy_babylonian_bricks_stonecutting",
+      "nabu:mossy_babylonian_brick_stairs",
+      "nabu:mossy_babylonian_brick_stairs_from_mossy_babylonian_bricks_stonecutting",
+      "nabu:mossy_babylonian_brick_wall",
+      "nabu:mossy_babylonian_brick_wall_from_mossy_babylonian_bricks_stonecutting",
+      "nabu:mossy_babylonian_bricks_from_moss_block",
+      "nabu:mossy_babylonian_bricks_from_vine"
     ]
   }
 }
