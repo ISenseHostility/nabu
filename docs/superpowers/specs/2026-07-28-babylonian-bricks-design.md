@@ -305,6 +305,26 @@ Noted, not built:
   already belongs to cracked, and a second smelting recipe on the same ingredient would shadow
   it, since furnace recipes match on input alone. Firing the polished block keeps one recipe
   per input and makes smooth a two-step refinement. No stonecutting recipe reaches smooth.
+- **Mossy tiles and glazed. Added 2026-07-28, after polished and smooth.** The set now stands
+  at **nine variants, 36 blocks, 75 recipes**. `mossy_babylonian_tiles` grows from the tiles
+  exactly as mossy bricks grow from bricks. `glazed_babylonian_bricks` sets lapis into the
+  brickwork — named for Babylon's Ishtar Gate, which was blue-glazed brick made to imitate
+  lapis, rather than "gilded", which would promise gold the texture does not deliver.
+
+### The obtaining rule the set settled into
+
+Not designed up front — it emerged as variants were added, and is worth stating because it
+decides where any future variant belongs:
+
+| Treatment | Route | Variants |
+| --- | --- | --- |
+| Reshaping stone | stonecutter | tiles, chiseled, polished |
+| Applying heat | furnace | cracked (from bricks), smooth (from polished) |
+| Adding a second material | crafting only | mossy, mossy tiles, glazed |
+
+A cut only reshapes stone, so anything incorporating another material has to be crafted and is
+deliberately unreachable from a stonecutter. Every route still descends from the single
+`babylonian_bricks` drop, which itself has no recipe at all.
 - **Any gameplay behaviour** — no bed, screw, controller or crop interaction. This set is
   decorative and stays that way.
 - **Waxed/weathering mechanics** or a copper-style progression between the four looks.
