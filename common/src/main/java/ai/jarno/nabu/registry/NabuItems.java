@@ -9,6 +9,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.block.Block;
 
 public final class NabuItems {
     public static final DeferredRegister<Item> ITEMS =
@@ -95,7 +96,29 @@ public final class NabuItems {
         return new Item.Properties().arch$tab(NabuCreativeTabs.MAIN);
     }
 
+    /** Registers a block item for each of a variant's four blocks, in creative-tab order. */
+    private static void blockItems(BrickSet set) {
+        blockItem(set.baseName(), set.block());
+        blockItem(set.formPrefix() + "_stairs", set.stairs());
+        blockItem(set.formPrefix() + "_slab", set.slab());
+        blockItem(set.formPrefix() + "_wall", set.wall());
+    }
+
+    private static void blockItem(String name, RegistrySupplier<? extends Block> block) {
+        ITEMS.register(
+                name,
+                () -> new BlockItem(
+                        block.get(),
+                        tabbed().setId(Nabu.key(Registries.ITEM, name))));
+    }
+
     public static void register() {
+        // Registered here rather than in field initialisers so the sixteen decorative blocks
+        // land after the Wonder's own items in the creative tab.
+        blockItems(NabuBlocks.BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.CRACKED_BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.BABYLONIAN_TILES);
+        blockItems(NabuBlocks.CHISELED_BABYLONIAN_BRICKS);
         ITEMS.register();
     }
 }
