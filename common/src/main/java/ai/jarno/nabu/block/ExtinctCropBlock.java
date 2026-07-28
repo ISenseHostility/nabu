@@ -30,8 +30,11 @@ public class ExtinctCropBlock extends CropBlock {
         super(properties);
     }
 
+    // Wildcard, not MapCodec<ExtinctCropBlock>: an invariant return type here would make this
+    // class impossible to subclass, which is exactly why vanilla's PitcherCropBlock cannot be
+    // extended.
     @Override
-    public MapCodec<ExtinctCropBlock> codec() {
+    public MapCodec<? extends ExtinctCropBlock> codec() {
         return CODEC;
     }
 
@@ -41,7 +44,7 @@ public class ExtinctCropBlock extends CropBlock {
     }
 
     private static boolean isBoosted(LevelReader level, BlockPos pos) {
-        return PlantingBedBlock.tierAt(level, pos.below()) == BedTier.BOOSTED;
+        return CropGates.isBoosted(level, pos);
     }
 
     /** Highest age reachable here: the fruiting stage is boosted-only. */
