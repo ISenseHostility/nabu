@@ -118,6 +118,8 @@ public final class NabuItems {
         blockItems(NabuBlocks.BABYLONIAN_BRICKS);
         blockItems(NabuBlocks.CRACKED_BABYLONIAN_BRICKS);
         blockItems(NabuBlocks.MOSSY_BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.POLISHED_BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.SMOOTH_BABYLONIAN_BRICKS);
         blockItems(NabuBlocks.BABYLONIAN_TILES);
         blockItems(NabuBlocks.CHISELED_BABYLONIAN_BRICKS);
         ITEMS.register();

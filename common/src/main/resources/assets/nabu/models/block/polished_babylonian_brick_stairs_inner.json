@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "nabu:block/polished_babylonian_bricks",
+    "side": "nabu:block/polished_babylonian_bricks",
+    "top": "nabu:block/polished_babylonian_bricks"
+  }
+}

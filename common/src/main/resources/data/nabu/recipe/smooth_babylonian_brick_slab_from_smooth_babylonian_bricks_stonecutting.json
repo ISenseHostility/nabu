@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "nabu:smooth_babylonian_bricks",
+  "result": {
+    "count": 2,
+    "id": "nabu:smooth_babylonian_brick_slab"
+  }
+}

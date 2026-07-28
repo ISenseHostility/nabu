@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "category": "blocks",
+  "experience": 0.1,
+  "ingredient": "nabu:polished_babylonian_bricks",
+  "result": {
+    "id": "nabu:smooth_babylonian_bricks"
+  }
+}
