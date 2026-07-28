@@ -291,8 +291,13 @@ Noted, not built:
   creative-only in survival — the sixteen ids above are the handoff.
 - **Real art.** Placeholders only, by explicit approval. Overwriting the four PNGs needs no
   JSON changes.
-- **Mossy variant.** Vanilla's stone brick family has one; this set does not. Not requested,
-  and it would want a moss-growth interaction to justify itself.
+- ~~**Mossy variant.**~~ **Added 2026-07-28, after the original build.** Requested as a fifth
+  variant, so `mossy_babylonian_bricks` plus its stairs, slab and wall now exist — 20 blocks
+  and 42 recipes in total. It follows vanilla's own rule: craftable from the base bricks plus
+  either a vine or a moss block, and **never stonecuttable from plain brick**, structurally the
+  same as cracked requiring a furnace. Its three forms cut from mossy as usual.
+  The moss-*growth* interaction floated here is still not built — mossy is a decorative
+  variant, not a mechanic.
 - **Any gameplay behaviour** — no bed, screw, controller or crop interaction. This set is
   decorative and stays that way.
 - **Waxed/weathering mechanics** or a copper-style progression between the four looks.
