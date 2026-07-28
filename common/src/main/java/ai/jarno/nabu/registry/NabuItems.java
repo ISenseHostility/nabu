@@ -5,6 +5,7 @@ import ai.jarno.nabu.item.FertilityCharmItem;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -54,6 +55,26 @@ public final class NabuItems {
     public static final RegistrySupplier<Item> EMMER = ITEMS.register(
             "emmer",
             () -> new Item(tabbed().setId(Nabu.key(Registries.ITEM, "emmer"))));
+
+    /** Plantable seed. Placing it sows the crop. */
+    public static final RegistrySupplier<Item> JUDEAN_DATE_SEEDS = ITEMS.register(
+            "judean_date_seeds",
+            () -> new BlockItem(
+                    NabuBlocks.JUDEAN_DATE.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "judean_date_seeds"))));
+
+    /**
+     * The harvest itself -- only obtainable from a palm that reached the fruiting stage.
+     * Apple-tier hunger with much better saturation, as a dense dried fruit should be.
+     */
+    public static final RegistrySupplier<Item> JUDEAN_DATE = ITEMS.register(
+            "judean_date",
+            () -> new Item(tabbed()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(4)
+                            .saturationModifier(0.5F)
+                            .build())
+                    .setId(Nabu.key(Registries.ITEM, "judean_date"))));
 
     /**
      * One-time trophy for restoring the Gardens. Carried in the offhand, it makes breeding

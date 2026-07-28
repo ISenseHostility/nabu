@@ -5,6 +5,7 @@
   "block.nabu.planting_bed": "Planting Bed",
   "block.nabu.silphium": "Silphium",
   "block.nabu.emmer": "Emmer",
+  "block.nabu.judean_date": "Judean Date Palm",
   "block.nabu.garden_controller": "Garden Shrine",
 
   "item.nabu.water_screw": "Water Screw",
@@ -14,6 +15,8 @@
   "item.nabu.silphium": "Silphium",
   "item.nabu.emmer_seeds": "Emmer Seeds",
   "item.nabu.emmer": "Emmer Grain",
+  "item.nabu.judean_date_seeds": "Judean Date Seeds",
+  "item.nabu.judean_date": "Judean Date",
   "item.nabu.fertility_charm": "Fertility Charm",
   "item.nabu.fertility_charm.desc": "Carried in the offhand, life begets life",
   "item.nabu.fertility_charm.desc2": "Breeding animals nearby may bear more young"
