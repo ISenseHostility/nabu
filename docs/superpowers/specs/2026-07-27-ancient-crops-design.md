@@ -8,8 +8,9 @@ Status: approved, ready for planning
 Add two extinct crops alongside Silphium, each exercising a growth form Silphium does not:
 
 - **Judean Date** — a two-block-tall crop.
-- **Emmer** — a self-planting crop: right-click harvest that regrows, plus occasional
-  self-seeding onto neighbouring beds.
+- **Emmer** — a self-planting crop: it seeds itself onto neighbouring beds over time, and can
+  be pushed onto one deliberately with bone meal. (Originally specced with a regrowing
+  right-click harvest; that was replaced on 2026-07-28 — see below.)
 
 Both are historically grounded the way Silphium is. The Judean date palm went extinct
 around the 6th century and was germinated in 2005 from 2000-year-old seeds recovered at
@@ -159,20 +160,34 @@ fruiting gate is inherited *unchanged* — capped at 6 unless the bed is Boosted
 override to the base behaviour is `getBaseSeedId()` returning `emmer_seeds`. Two behaviours
 are added on top.
 
-### Right-click harvest
+### ~~Right-click harvest~~ → Bone-meal spread
 
-Override `useWithoutItem`:
+**Superseded 2026-07-28.** The original design had `useWithoutItem` pop 1–2 `emmer` at max age
+and reset the plant to `REGROWN_AGE = 4`, leaving it standing. That was removed on request.
+Emmer is now harvested by breaking it, like Silphium; the loot table already yields
+`nabu:emmer` at age 7, so grain access is unchanged — what is lost is harvesting without
+replanting.
 
-- Age < `MAX_AGE`: return `InteractionResult.PASS` so ordinary interaction is unaffected.
-- Age == `MAX_AGE`: pop 1–2 `emmer`, play a harvest sound, and set the state to
-  `REGROWN_AGE = 4` instead of breaking the block.
+In its place, **bone meal on a max-age plant sows a seedling on a nearby bed**:
 
-Regrowth is 3 growth steps rather than the 7 a fresh seed needs — meaningfully faster than
-replanting, not free. Because age 7 is only reachable on a Boosted bed, right-click harvest
-is inherently a Boosted-only reward; no extra gate is required. Breaking the block by hand
-still yields seeds, which remains the way to get planting stock for manual expansion.
+- `isValidBonemealTarget` — true if the plant can still grow (inherited behaviour), *or* if it
+  is at max age and at least one nearby bed can take a seedling.
+- `performBonemeal` — grow if it can still grow, otherwise sow one seedling at a random valid
+  target.
+- With no valid target the block is not a bone-meal target at all, so nothing is consumed.
 
-### Self-seeding
+The second branch tests `isMaxAge`, **not** "growth is capped". Those look interchangeable and
+are not: a plant on an unwatered bed is also capped, one stage short of fruiting, and hanging
+the spread off that would hand the player the reward without ever running a screw. Max age is
+Boosted-only by construction, so gating on it keeps the ladder intact — the same reasoning
+that made the old right-click harvest safe.
+
+### Self-seeding (the passive path)
+
+The two spreading paths differ on purpose: this one runs on every mature plant, so it must
+stay O(1); the bone-meal path above is triggered by a player and can afford to scan the whole
+box, which is what makes it dependable rather than a coin flip. Both share one
+`canSowAt` predicate, so "where may Emmer take root" is defined in exactly one place.
 
 On random tick, when at `MAX_AGE`:
 
@@ -269,7 +284,10 @@ for Claude Code to launch the game. Verification is therefore:
    - Bone meal on the Judean Date stops at the same caps as natural growth.
    - Judean Date under a ceiling stalls at age 1 and does not eat the ceiling block.
    - Breaking either half of a Judean Date drops exactly one set of loot.
-   - Emmer right-clicked at full growth drops grain and regrows rather than breaking.
+   - Bone meal on a still-growing Emmer grows it, capped by the bed tier as before.
+   - Bone meal on a **max-age** Emmer sows a seedling on a nearby bed and is consumed;
+     with no bed in range nothing happens and the bone meal is **not** consumed.
+   - Bone meal on an age-6 Emmer on an *unwatered* bed does nothing — it must not spread.
    - Emmer at full growth eventually seeds an empty planting bed nearby, and never seeds
      vanilla farmland placed next to it.
    - Both crops survive a save/load cycle mid-growth.
