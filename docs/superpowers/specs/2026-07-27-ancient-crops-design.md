@@ -157,8 +157,8 @@ Then:
 
 `ai.jarno.nabu.block.EmmerBlock extends ExtinctCropBlock`. Ages 0–7 from `CropBlock`. The
 fruiting gate is inherited *unchanged* — capped at 6 unless the bed is Boosted. The only
-override to the base behaviour is `getBaseSeedId()` returning `emmer_seeds`. Two behaviours
-are added on top.
+override to the base behaviour is `getBaseSeedId()` returning the emmer item itself. Two
+behaviours are added on top.
 
 ### ~~Right-click harvest~~ → Bone-meal spread
 
@@ -211,8 +211,14 @@ Consequences, stated deliberately:
 
 ### Items
 
-- `emmer_seeds` — `BlockItem` placing the crop.
-- `emmer` — the grain. Inert, no food component. Reserved as a future crafting ingredient.
+- `emmer` — the grain **and** the seed. A `BlockItem` that both drops from the crop and
+  replants it. No food component; reserved as a future crafting ingredient.
+
+**Superseded 2026-07-28.** Emmer originally had a separate `emmer_seeds` item, with the grain
+inert. It now replants itself the way a carrot does: one item that is both harvest and seed,
+so expanding a field costs grain rather than a second currency to track. The loot table
+follows vanilla's carrot shape — one emmer always, plus a Fortune-scaled bonus pool at age 7 —
+and `emmer_seeds` is removed entirely, including from the Wonder's chest loot.
 
 ## Registration and data
 
@@ -221,9 +227,9 @@ Following the existing patterns in `NabuBlocks` / `NabuItems` exactly.
 **`NabuBlocks`** — two entries, both `ofLegacyCopy(Blocks.WHEAT)` like Silphium, each with
 its `setId(Nabu.key(Registries.BLOCK, …))`.
 
-**`NabuItems`** — four entries, all via `tabbed()` so they land in the existing creative tab
-automatically: `judean_date_seeds`, `judean_date` (with the food component), `emmer_seeds`,
-`emmer`.
+**`NabuItems`** — three entries, all via `tabbed()` so they land in the existing creative tab
+automatically: `judean_date_seeds`, `judean_date` (with the food component), and `emmer`
+(a `BlockItem`, since it is its own seed).
 
 **Data files:**
 
@@ -265,12 +271,15 @@ playable and testable without art, and the art swap later is a texture-path edit
   `_stage2/3/4_bottom.json` + `_stage2/3/4_top.json`.
 - `items/*.json` + `models/item/*.json` for all four items.
 
-**Needed from Jarno later** (art is his, per `CLAUDE.md`): real 16×16 textures at
-`assets/nabu/textures/block/emmer_stage0-7.png`,
-`assets/nabu/textures/block/judean_date_{stage0,stage1}.png`,
-`judean_date_stage{2,3,4}_{bottom,top}.png`, and
-`assets/nabu/textures/item/{emmer,emmer_seeds,judean_date,judean_date_seeds}.png`. Swapping
-them in is a one-line edit per model file.
+**Resolved 2026-07-28.** The vanilla placeholders are gone. All three crops now have their own
+16×16 stage textures under `assets/nabu/textures/block/` and their items under
+`assets/nabu/textures/item/`, and every model points at them. These are still generated
+placeholders rather than hand-drawn art, so replacing any of them remains a file drop with no
+JSON change — the paths already match the model names.
+
+Two constraints worth keeping if they are ever redrawn: the palm's trunk must be the same
+width in a stage's lower and upper halves or it steps at the block boundary, and the three
+plants have to be separable by silhouette, not colour alone.
 
 ## Testing
 

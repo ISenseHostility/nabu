@@ -42,9 +42,10 @@ public class EmmerBlock extends ExtinctCropBlock {
         return CODEC;
     }
 
+    /** The grain is the seed, as a carrot is its own seed. There is no separate seed item. */
     @Override
     protected ItemLike getBaseSeedId() {
-        return NabuItems.EMMER_SEEDS.get();
+        return NabuItems.EMMER.get();
     }
 
     /**

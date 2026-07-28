@@ -45,17 +45,16 @@ public final class NabuItems {
             "silphium",
             () -> new Item(tabbed().setId(Nabu.key(Registries.ITEM, "silphium"))));
 
-    /** Plantable seed. Placing it sows the crop. */
-    public static final RegistrySupplier<Item> EMMER_SEEDS = ITEMS.register(
-            "emmer_seeds",
-            () -> new BlockItem(
-                    NabuBlocks.EMMER.get(),
-                    tabbed().setId(Nabu.key(Registries.ITEM, "emmer_seeds"))));
-
-    /** The grain itself -- reserved as a crafting ingredient, no use yet. */
+    /**
+     * The grain, and the thing you sow. Emmer has no separate seed item: the harvest replants
+     * itself the way a carrot does, so a field costs you grain to expand rather than a second
+     * currency to keep track of.
+     */
     public static final RegistrySupplier<Item> EMMER = ITEMS.register(
             "emmer",
-            () -> new Item(tabbed().setId(Nabu.key(Registries.ITEM, "emmer"))));
+            () -> new BlockItem(
+                    NabuBlocks.EMMER.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "emmer"))));
 
     /** Plantable seed. Placing it sows the crop. */
     public static final RegistrySupplier<Item> JUDEAN_DATE_SEEDS = ITEMS.register(
