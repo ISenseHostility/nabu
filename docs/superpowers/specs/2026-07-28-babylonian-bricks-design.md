@@ -298,6 +298,13 @@ Noted, not built:
   same as cracked requiring a furnace. Its three forms cut from mossy as usual.
   The moss-*growth* interaction floated here is still not built — mossy is a decorative
   variant, not a mechanic.
+- **Polished and smooth. Added 2026-07-28, after mossy.** Requested as two further variants,
+  bringing the set to **seven variants, 28 blocks, 60 recipes**. Polished joins the stonecutter
+  fan-out from the base bricks and is also craftable as a 2×2, mirroring how vanilla polishes
+  stone. Smooth is **smelted from polished, not from the bricks** — the bricks' furnace slot
+  already belongs to cracked, and a second smelting recipe on the same ingredient would shadow
+  it, since furnace recipes match on input alone. Firing the polished block keeps one recipe
+  per input and makes smooth a two-step refinement. No stonecutting recipe reaches smooth.
 - **Any gameplay behaviour** — no bed, screw, controller or crop interaction. This set is
   decorative and stays that way.
 - **Waxed/weathering mechanics** or a copper-style progression between the four looks.
