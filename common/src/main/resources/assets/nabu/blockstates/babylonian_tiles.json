@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "nabu:block/babylonian_tiles"
+    }
+  }
+}

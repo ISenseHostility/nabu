@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "nabu:block/chiseled_babylonian_brick_slab"
+    },
+    "type=double": {
+      "model": "nabu:block/chiseled_babylonian_bricks"
+    },
+    "type=top": {
+      "model": "nabu:block/chiseled_babylonian_brick_slab_top"
+    }
+  }
+}

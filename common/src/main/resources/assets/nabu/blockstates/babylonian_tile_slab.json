@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "nabu:block/babylonian_tile_slab"
+    },
+    "type=double": {
+      "model": "nabu:block/babylonian_tiles"
+    },
+    "type=top": {
+      "model": "nabu:block/babylonian_tile_slab_top"
+    }
+  }
+}
