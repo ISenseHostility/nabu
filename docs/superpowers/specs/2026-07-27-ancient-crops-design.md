@@ -253,6 +253,12 @@ playable and testable without art, and the art swap later is a texture-path edit
 **Placeholders used** (all confirmed present in 26.2):
 
 - Emmer: `minecraft:block/wheat_stage0`–`7`, parent `minecraft:block/crop`.
+- **Model shape, set 2026-07-28.** Emmer and Silphium use `minecraft:block/crop`, the
+  four-plane `#` arrangement vanilla gives grain. The Judean Date uses
+  `minecraft:block/cross`, the two-plane X, which suits a plant with a single trunk far
+  better than four parallel sheets of palm. Note the texture key differs with the
+  parent: `crop` takes `#crop`, `cross` takes `#cross`, so the two cannot be swapped by
+  changing the parent alone.
 - Judean Date bottoms, ages 0–4 in order: `pitcher_crop_bottom_stage_1`, `_stage_1`,
   `_stage_2`, `_stage_3`, `_stage_4`. (Vanilla has no `_stage_0`; age 0 reuses stage 1.)
 - Judean Date tops, ages 2–4 in order: `pitcher_crop_top`, `pitcher_crop_top_stage_3`,
