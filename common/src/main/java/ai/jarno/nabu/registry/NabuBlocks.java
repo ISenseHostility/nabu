@@ -5,6 +5,7 @@ import ai.jarno.nabu.block.DeadLeavesBlock;
 import ai.jarno.nabu.block.EmmerBlock;
 import ai.jarno.nabu.block.ExtinctCropBlock;
 import ai.jarno.nabu.block.GardenControllerBlock;
+import ai.jarno.nabu.block.GardenFernBlock;
 import ai.jarno.nabu.block.JudeanDateBlock;
 import ai.jarno.nabu.block.NabuStairBlock;
 import ai.jarno.nabu.block.PlantingBedBlock;
@@ -89,6 +90,19 @@ public final class NabuBlocks {
             "withered_shrub",
             () -> new WitheredShrubBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.DEAD_BUSH)
                     .setId(Nabu.key(Registries.BLOCK, "withered_shrub"))));
+
+    /**
+     * What a withered shrub becomes when the shrine greens the ruin. Copies {@link Blocks#FERN}
+     * for its feel and then widens where it can stand -- see {@link GardenFernBlock}.
+     *
+     * <p>Copying fern is safe for the reason {@link DeadLeavesBlock} spells out: fern carries no
+     * block state properties at all, so {@code ofLegacyCopy} has no state-dependent property
+     * function to drag across onto a block that could not evaluate it.
+     */
+    public static final RegistrySupplier<GardenFernBlock> GARDEN_FERN = BLOCKS.register(
+            "garden_fern",
+            () -> new GardenFernBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.FERN)
+                    .setId(Nabu.key(Registries.BLOCK, "garden_fern"))));
 
     /**
      * Built up from {@code Properties.of()} rather than copied off {@link Blocks#OAK_LEAVES},

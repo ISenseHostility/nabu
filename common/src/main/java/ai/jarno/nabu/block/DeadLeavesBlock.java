@@ -2,6 +2,7 @@ package ai.jarno.nabu.block;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
@@ -24,8 +25,15 @@ public class DeadLeavesBlock extends Block implements DeadFoliage {
         super(properties);
     }
 
+    /**
+     * Persistent on purpose. Ordinary leaves carry {@code distance}/{@code persistent} and decay
+     * once no log is within {@link LeavesBlock#DECAY_DISTANCE}; there is not a single log in the
+     * Wonder, so plain oak leaves would compute a decay distance on the first shape update and
+     * quietly drop away the canopy the player just earned. Persistent leaves never schedule that
+     * tick at all, which is the same reason {@link DeadLeavesBlock} is not a leaves block itself.
+     */
     @Override
     public @Nullable BlockState revived(BlockState state) {
-        return Blocks.OAK_LEAVES.defaultBlockState();
+        return Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
     }
 }

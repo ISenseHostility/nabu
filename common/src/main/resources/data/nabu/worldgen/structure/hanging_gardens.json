@@ -4,8 +4,8 @@
   "step": "surface_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "beard_thin",
-  "start_pool": "nabu:hanging_gardens/skeleton",
-  "size": 4,
+  "start_pool": "nabu:hanging_gardens/plinth",
+  "size": 6,
   "start_height": {
     "absolute": 0
   },

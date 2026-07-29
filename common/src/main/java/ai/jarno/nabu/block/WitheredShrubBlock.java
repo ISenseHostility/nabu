@@ -1,11 +1,11 @@
 package ai.jarno.nabu.block;
 
+import ai.jarno.nabu.registry.NabuBlocks;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -51,8 +51,14 @@ public class WitheredShrubBlock extends VegetationBlock implements DeadFoliage {
         return state.isFaceSturdy(level, pos, Direction.UP);
     }
 
+    /**
+     * Deliberately <em>not</em> {@code minecraft:fern}. Vanilla's fern keeps vegetation's
+     * soil-only survival rule, so on a brick terrace it would be culled on the same neighbour
+     * update that placed it -- the greening would flash and vanish. {@link GardenFernBlock}
+     * carries this block's broader {@link #mayPlaceOn} across into the living form.
+     */
     @Override
     public @Nullable BlockState revived(BlockState state) {
-        return Blocks.FERN.defaultBlockState();
+        return NabuBlocks.GARDEN_FERN.get().defaultBlockState();
     }
 }

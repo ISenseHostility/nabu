@@ -6,83 +6,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "nabu:clay_tablet"
-        }
-      ]
-    },
-    {
-      "rolls": 1.0,
-      "entries": [
+          "name": "nabu:clay_tablet",
+          "weight": 3
+        },
         {
-          "type": "minecraft:item",
-          "name": "nabu:water_screw",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 5.0,
-                "max": 7.0
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1.0,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "nabu:silphium_seeds",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2.0,
-                "max": 4.0
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1.0,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "nabu:emmer",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2.0,
-                "max": 4.0
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1.0,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "nabu:judean_date_seeds",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1.0,
-                "max": 3.0
-              }
-            }
-          ]
+          "type": "minecraft:empty",
+          "weight": 5
         }
       ]
     },
@@ -102,8 +31,8 @@
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 1.0,
-                "max": 6.0
+                "min": 2.0,
+                "max": 8.0
               }
             }
           ]
@@ -117,23 +46,23 @@
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 2.0,
-                "max": 8.0
+                "min": 3.0,
+                "max": 9.0
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:bone_meal",
-          "weight": 8,
+          "name": "minecraft:gold_ingot",
+          "weight": 5,
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1.0,
-                "max": 5.0
+                "max": 3.0
               }
             }
           ]
@@ -141,7 +70,17 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:emerald",
-          "weight": 4
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1.0,
+                "max": 2.0
+              }
+            }
+          ]
         },
         {
           "type": "minecraft:item",
@@ -159,11 +98,50 @@
           ]
         },
         {
+          "type": "minecraft:item",
+          "name": "minecraft:bone_meal",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1.0,
+                "max": 4.0
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 8
+        }
+      ]
+    },
+    {
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nabu:emmer",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1.0,
+                "max": 3.0
+              }
+            }
+          ]
+        },
+        {
           "type": "minecraft:empty",
           "weight": 6
         }
       ]
     }
   ],
-  "random_sequence": "nabu:chests/hanging_gardens"
+  "random_sequence": "nabu:chests/hanging_gardens_chamber"
 }

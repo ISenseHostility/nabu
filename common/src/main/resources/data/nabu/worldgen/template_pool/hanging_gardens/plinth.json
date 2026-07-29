@@ -4,7 +4,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "nabu:hanging_gardens/skeleton",
+        "location": "nabu:hanging_gardens/plinth",
         "processors": "nabu:hanging_gardens_weathering",
         "projection": "rigid"
       },

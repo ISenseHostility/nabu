@@ -29,5 +29,8 @@ public final class NabuClient {
         // The awakened basin's water plane is tintindex 0 over the greyscale water sprite,
         // the same arrangement as a filled cauldron, so it borrows the same tint source.
         ColorHandlerRegistry.registerBlockColors(BlockTintSources.water(), NabuBlocks.GARDEN_CONTROLLER);
+        // The revived fern is vanilla's greyscale fern sprite over tintindex 0, so it takes the
+        // same grass tint a vanilla fern does and shifts with the biome it stands in.
+        ColorHandlerRegistry.registerBlockColors(BlockTintSources.grass(), NabuBlocks.GARDEN_FERN);
     }
 }

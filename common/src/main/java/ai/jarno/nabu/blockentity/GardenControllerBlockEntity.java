@@ -62,11 +62,14 @@ public class GardenControllerBlockEntity extends BlockEntity {
     private static final int AWAKEN_IDLE = -1;
 
     /**
-     * Reach of the greening sweep. Wider than the aura, because the dead growth dresses the whole
-     * ruin rather than clustering on the terraces the shrine waters.
+     * Reach of the greening sweep. Far wider than the aura, because the dead growth dresses the
+     * whole ruin rather than clustering on the terraces the shrine waters -- and the shrine
+     * stands in the reservoir court at one corner of the monument rather than at its middle, so
+     * the radius has to cover the full 33-block footprint measured from an off-centre origin,
+     * plus a margin of surrounding ground for anything the player has dressed themselves.
      */
-    private static final int GREEN_RADIUS = 24;
-    private static final int GREEN_HEIGHT = 16;
+    private static final int GREEN_RADIUS = 40;
+    private static final int GREEN_HEIGHT = 24;
     private static final int GREEN_IDLE = Integer.MIN_VALUE;
 
     /** Terraces with at least one registered Wonder bed. Discovered, never assumed. */
@@ -210,20 +213,38 @@ public class GardenControllerBlockEntity extends BlockEntity {
      */
     private void tickGreenSweep(Level level, BlockPos pos) {
         int revived = 0;
+        int y = pos.getY() + greenSweepY;
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+
+        // The chunk lookup, not the block read, is what a layer this wide would otherwise spend
+        // its time on. Walking dz on the inside means sixteen consecutive columns share a chunk,
+        // so the check is hoisted and only repeated when the cursor actually crosses a border.
+        int lastChunkX = Integer.MIN_VALUE;
+        int lastChunkZ = Integer.MIN_VALUE;
+        boolean loaded = false;
+
         for (int dx = -GREEN_RADIUS; dx <= GREEN_RADIUS; dx++) {
             for (int dz = -GREEN_RADIUS; dz <= GREEN_RADIUS; dz++) {
-                BlockPos target = pos.offset(dx, greenSweepY, dz);
-                // Never force-load: growth in unloaded chunks simply stays dead.
-                if (!level.hasChunkAt(target)) {
+                cursor.set(pos.getX() + dx, y, pos.getZ() + dz);
+                int chunkX = cursor.getX() >> 4;
+                int chunkZ = cursor.getZ() >> 4;
+                if (chunkX != lastChunkX || chunkZ != lastChunkZ) {
+                    lastChunkX = chunkX;
+                    lastChunkZ = chunkZ;
+                    // Never force-load: growth in unloaded chunks simply stays dead.
+                    loaded = level.hasChunkAt(cursor);
+                }
+                if (!loaded) {
                     continue;
                 }
-                BlockState state = level.getBlockState(target);
+                BlockState state = level.getBlockState(cursor);
                 if (!(state.getBlock() instanceof DeadFoliage foliage)) {
                     continue;
                 }
                 BlockState living = foliage.revived(state);
                 if (living != null) {
-                    level.setBlock(target, living, Block.UPDATE_ALL);
+                    // The cursor is reused every column, so the world must not keep it.
+                    level.setBlock(cursor.immutable(), living, Block.UPDATE_ALL);
                     revived++;
                 }
             }
