@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_date_syrup": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "nabu:date_syrup"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_date_syrup"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "nabu:date_cake"
+    ]
+  }
+}

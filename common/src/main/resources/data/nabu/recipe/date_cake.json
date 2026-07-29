@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "nabu:date_syrup",
+    "nabu:emmer",
+    "nabu:emmer",
+    "nabu:emmer"
+  ],
+  "result": {
+    "id": "nabu:date_cake"
+  }
+}

@@ -90,7 +90,17 @@
   "item.nabu.emmer": "Emmer Grain",
   "item.nabu.judean_date_seeds": "Judean Date Seeds",
   "item.nabu.judean_date": "Judean Date",
+  "item.nabu.silphium_resin": "Silphium Resin",
+  "item.nabu.date_syrup": "Date Syrup",
+  "item.nabu.emmer_bread": "Emmer Bread",
+  "item.nabu.spiced_meat": "Spiced Meat",
+  "item.nabu.date_cake": "Date Cake",
   "item.nabu.fertility_charm": "Fertility Charm",
   "item.nabu.fertility_charm.desc": "Carried in the offhand, life begets life",
-  "item.nabu.fertility_charm.desc2": "Breeding animals nearby may bear more young"
+  "item.nabu.fertility_charm.desc2": "Breeding animals nearby may bear more young",
+
+  "item.minecraft.potion.effect.ancient_remedy": "Ancient Remedy",
+  "item.minecraft.splash_potion.effect.ancient_remedy": "Splash Ancient Remedy",
+  "item.minecraft.lingering_potion.effect.ancient_remedy": "Lingering Ancient Remedy",
+  "item.minecraft.tipped_arrow.effect.ancient_remedy": "Arrow of the Ancient Remedy"
 }

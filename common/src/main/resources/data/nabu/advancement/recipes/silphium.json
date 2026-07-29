@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_silphium": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "nabu:silphium"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_silphium"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "nabu:silphium_resin"
+    ]
+  }
+}

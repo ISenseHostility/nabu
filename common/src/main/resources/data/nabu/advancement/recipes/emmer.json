@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_emmer": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "nabu:emmer"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_emmer"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "nabu:emmer_bread"
+    ]
+  }
+}

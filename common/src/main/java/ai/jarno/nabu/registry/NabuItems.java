@@ -8,7 +8,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.block.Block;
 
 public final class NabuItems {
@@ -75,6 +77,67 @@ public final class NabuItems {
                             .saturationModifier(0.5F)
                             .build())
                     .setId(Nabu.key(Registries.ITEM, "judean_date"))));
+
+    /**
+     * Refined silphium -- {@code laserpicium}, the resin that was the actual traded product.
+     * Not food itself; it is the input both of silphium's uses share.
+     */
+    public static final RegistrySupplier<Item> SILPHIUM_RESIN = ITEMS.register(
+            "silphium_resin",
+            () -> new Item(tabbed().setId(Nabu.key(Registries.ITEM, "silphium_resin"))));
+
+    /**
+     * Date syrup -- {@code dibs}, Mesopotamia's sweetener before honey was common. Bottled,
+     * which costs three properties rather than one: it is drunk rather than eaten, drinking
+     * hands back the empty bottle, and so does <em>crafting</em> with it, so baking a cake
+     * does not quietly swallow the glass. A honey bottle behaves the same three ways.
+     */
+    public static final RegistrySupplier<Item> DATE_SYRUP = ITEMS.register(
+            "date_syrup",
+            () -> new Item(tabbed()
+                    .food(
+                            new FoodProperties.Builder()
+                                    .nutrition(2)
+                                    .saturationModifier(0.4F)
+                                    .build(),
+                            Consumables.DEFAULT_DRINK)
+                    .usingConvertsTo(Items.GLASS_BOTTLE)
+                    .craftRemainder(Items.GLASS_BOTTLE)
+                    .stacksTo(16)
+                    .setId(Nabu.key(Registries.ITEM, "date_syrup"))));
+
+    /** What emmer was actually for. A shade better than vanilla bread's 5 / 0.6. */
+    public static final RegistrySupplier<Item> EMMER_BREAD = ITEMS.register(
+            "emmer_bread",
+            () -> new Item(tabbed()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(6)
+                            .saturationModifier(0.8F)
+                            .build())
+                    .setId(Nabu.key(Registries.ITEM, "emmer_bread"))));
+
+    /** Cooked meat rubbed with resin. Saturation-led, because seasoning is the whole point. */
+    public static final RegistrySupplier<Item> SPICED_MEAT = ITEMS.register(
+            "spiced_meat",
+            () -> new Item(tabbed()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(7)
+                            .saturationModifier(1.1F)
+                            .build())
+                    .setId(Nabu.key(Registries.ITEM, "spiced_meat"))));
+
+    /**
+     * Grain and syrup meeting directly -- the one point where two chains cross, and the payoff
+     * for having run both.
+     */
+    public static final RegistrySupplier<Item> DATE_CAKE = ITEMS.register(
+            "date_cake",
+            () -> new Item(tabbed()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(8)
+                            .saturationModifier(1.0F)
+                            .build())
+                    .setId(Nabu.key(Registries.ITEM, "date_cake"))));
 
     /**
      * One-time trophy for restoring the Gardens. Carried in the offhand, it makes breeding
