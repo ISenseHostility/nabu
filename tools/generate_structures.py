@@ -86,6 +86,7 @@ GLAZED = ("nabu:glazed_babylonian_bricks", None)
 CHISELED = ("nabu:chiseled_babylonian_bricks", None)
 TILES = ("nabu:babylonian_tiles", None)
 MOSSY_TILES = ("nabu:mossy_babylonian_tiles", None)
+COARSE_DIRT = ("minecraft:coarse_dirt", None)
 PARAPET = ("nabu:babylonian_brick_wall", None)
 STAIR = ("nabu:babylonian_brick_stairs", {"facing": "north", "half": "bottom", "shape": "straight"})
 AIR = ("minecraft:air", None)
@@ -197,6 +198,24 @@ def paving(x, z, variant):
     return MOSSY_TILES if rnd(x, z, 23, variant) < 180 else TILES
 
 
+def bare_earth(x, z, variant):
+    """Whether this deck cell is drifted soil rather than paving.
+
+    Clustered off a coarse 4x4 grid so the patches read as drifts rather than salt-and-pepper,
+    with a per-cell roll fraying their edges.
+
+    Every one of these becomes a grass block the moment the shrine wakes, and the sweep bone
+    meals it on the spot -- which needs air directly above. Nothing may be laid on top of a
+    patch, so `earth_cells` is fed to the decoration pass as reserved ground and the parapet
+    course steps around it.
+    """
+    return rnd(x // 4, z // 4, 71, variant) < 170 and rnd(x, z, 73, variant) < 640
+
+
+def earth_cells(variant):
+    return {(x, z) for x in range(SIZE_X) for z in range(SIZE_Z) if bare_earth(x, z, variant)}
+
+
 def protected_cells():
     """Everything the bays own. Decoration and paving must not touch these."""
     keep = set()
@@ -221,6 +240,8 @@ def fill_mass(v, variant):
                         v.set(x, y, z, STAIR)
                     elif (x, z) in protected:
                         v.set(x, y, z, BRICK)      # bays rewrite their own decks below
+                    elif not in_stair(x, z) and bare_earth(x, z, variant):
+                        v.set(x, y, z, COARSE_DIRT)
                     else:
                         v.set(x, y, z, paving(x, z, variant))
                 elif y == CISTERN_Y and 1 <= x <= 31 and 1 <= z <= 31 and not in_stair(x, z):
@@ -313,6 +334,10 @@ def build_parapets(v, variant):
                     continue                       # interior, not the lip
                 if in_stair(x, z) or not v.solid(x, deck, z):
                     continue
+                # Where soil has drifted over the lip the parapet has gone with it. That keeps
+                # the sky open over every patch, which the bone meal at greening time needs.
+                if v.get(x, deck, z) == COARSE_DIRT:
+                    continue
                 if rnd(x, z, 31, variant) < 130:
                     continue                       # a gap in the parapet
                 v.set(x, deck + 1, z, PARAPET)
@@ -337,6 +362,9 @@ def build_cella(v, variant):
             doorway = (x, z) == CELLA_DOOR
             if not edge or doorway:
                 continue
+            # The cella stands on stone, not on a drift of soil that is about to sprout.
+            if v.get(x, deck, z) == COARSE_DIRT:
+                v.set(x, deck, z, paving(x, z, variant))
             height = 3 if rnd(x, z, 53, variant) > 220 else 2
             for y in range(deck + 1, deck + 1 + height):
                 v.set(x, y, z, weathered(x, y, z, variant))
@@ -354,6 +382,9 @@ def decorate(v, variant):
     # The temple doorway is the only way into the monument's interior. A shrub growing in it
     # would be a one-block plug across the entrance to everything below.
     reserved.add(CELLA_DOOR)
+    # Drifts of soil are left bare. Whatever the shrine's bone meal raises there is the point;
+    # a dead shrub sitting on one would both hide it and fail isValidBonemealTarget.
+    reserved.update(earth_cells(variant))
 
     # Canopy overhanging every terrace edge, with vines trailing beneath it.
     #

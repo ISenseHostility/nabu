@@ -9,6 +9,7 @@ import ai.jarno.nabu.block.PlantingBedBlock;
 import ai.jarno.nabu.registry.NabuBlockEntities;
 import ai.jarno.nabu.registry.NabuItems;
 import ai.jarno.nabu.registry.NabuSounds;
+import ai.jarno.nabu.registry.NabuTags;
 import ai.jarno.nabu.registry.NabuTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -18,12 +19,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -72,6 +75,9 @@ public class GardenControllerBlockEntity extends BlockEntity {
     private static final int GREEN_HEIGHT = 24;
     private static final int GREEN_IDLE = Integer.MIN_VALUE;
 
+    /** Patches bone mealed per tick. Four keeps the burst well under one sweep layer's cost. */
+    private static final int BLOOM_PER_TICK = 4;
+
     /** Terraces with at least one registered Wonder bed. Discovered, never assumed. */
     private final Set<Integer> known = new LinkedHashSet<>();
 
@@ -107,6 +113,9 @@ public class GardenControllerBlockEntity extends BlockEntity {
      * block is a no-op, which is what makes replaying it safe.
      */
     private int greenSweepY = GREEN_IDLE;
+
+    /** Greened but not yet bloomed patches. Transient by design -- see {@link #tickBloom}. */
+    private final ArrayDeque<BlockPos> pendingBloom = new ArrayDeque<>();
 
     public GardenControllerBlockEntity(BlockPos pos, BlockState state) {
         super(NabuBlockEntities.GARDEN_CONTROLLER.get(), pos, state);
@@ -238,13 +247,14 @@ public class GardenControllerBlockEntity extends BlockEntity {
                     continue;
                 }
                 BlockState state = level.getBlockState(cursor);
-                if (!(state.getBlock() instanceof DeadFoliage foliage)) {
-                    continue;
-                }
-                BlockState living = foliage.revived(state);
-                if (living != null) {
-                    // The cursor is reused every column, so the world must not keep it.
-                    level.setBlock(cursor.immutable(), living, Block.UPDATE_ALL);
+                if (state.getBlock() instanceof DeadFoliage foliage) {
+                    BlockState living = foliage.revived(state);
+                    if (living != null) {
+                        // The cursor is reused every column, so the world must not keep it.
+                        level.setBlock(cursor.immutable(), living, Block.UPDATE_ALL);
+                        revived++;
+                    }
+                } else if (state.is(NabuTags.GREENS_INTO_GRASS) && greenGround(level, cursor.immutable())) {
                     revived++;
                 }
             }
@@ -259,6 +269,54 @@ public class GardenControllerBlockEntity extends BlockEntity {
             greened = true;
             setChanged();
             Nabu.LOGGER.info("Greening complete at {}.", pos);
+        }
+    }
+
+    /**
+     * Turn a drift of bare earth to grass and queue it to be bone mealed.
+     *
+     * <p>The bone meal is the shrine's work rather than the fertility aura's on purpose: the aura
+     * reaches barely a third as far as the sweep and spends four attempts a second across that
+     * whole volume, so the far side of the monument would turn green long before anything grew on
+     * it.
+     *
+     * <p>It is queued rather than done here because {@code GrassBlock.performBonemeal} makes a
+     * hundred and twenty-eight placement attempts per call. A layer of the sweep can hold dozens
+     * of patches, and firing them all on one tick is exactly the hitch the sliced sweep exists to
+     * avoid. {@link #tickBloom} drains them a few at a time instead.
+     *
+     * @return true, so the caller can count it; the conversion cannot fail once the tag matched
+     */
+    private boolean greenGround(Level level, BlockPos pos) {
+        level.setBlock(pos, Blocks.GRASS_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+        pendingBloom.add(pos);
+        return true;
+    }
+
+    /**
+     * Bring a few queued patches into flower.
+     *
+     * <p>Routed through {@link BonemealableBlock} rather than placing vegetation directly, so each
+     * patch grows whatever the biome it stands in would actually put there. The state is re-read
+     * rather than trusted from when it was queued: a player may have dug the grass out in the
+     * seconds since, and it is not ours to grow anything on what replaced it.
+     *
+     * <p>The queue is deliberately not persisted. It is cosmetic polish trailing a few seconds
+     * behind the green, and a server stopped mid-bloom leaves plain grass rather than anything
+     * broken -- whereas saving it would mean reasoning about a queue whose blocks may no longer
+     * exist on load.
+     */
+    private void tickBloom(ServerLevel level) {
+        for (int i = 0; i < BLOOM_PER_TICK && !pendingBloom.isEmpty(); i++) {
+            BlockPos pos = pendingBloom.poll();
+            if (!level.hasChunkAt(pos)) {
+                continue;
+            }
+            BlockState state = level.getBlockState(pos);
+            if (state.getBlock() instanceof BonemealableBlock bonemealable
+                    && bonemealable.isValidBonemealTarget(level, pos, state)) {
+                bonemealable.performBonemeal(level, level.getRandom(), pos, state);
+            }
         }
     }
 
@@ -324,6 +382,11 @@ public class GardenControllerBlockEntity extends BlockEntity {
         }
         if (garden.greenSweepY != GREEN_IDLE) {
             garden.tickGreenSweep(level, pos);
+        }
+        // Trails the sweep rather than gating on it, so the bloom keeps rolling out over the
+        // patches the sweep has already turned while it is still climbing.
+        if (!garden.pendingBloom.isEmpty() && level instanceof ServerLevel server) {
+            garden.tickBloom(server);
         }
 
         if (garden.known.isEmpty() && time % ADOPT_INTERVAL_TICKS == 0L) {

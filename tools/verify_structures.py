@@ -156,6 +156,39 @@ PASSABLE = {AIR, "nabu:withered_shrub", "nabu:garden_fern", "nabu:withered_vine"
             "minecraft:ladder", None}
 
 
+def verify_earth(tag, grid):
+    """Bare-earth drifts must be able to become, and stay, grass.
+
+    `GrassBlock.isValidBonemealTarget` demands air directly above, so anything laid on a patch
+    -- a parapet course, a cella wall, a dead shrub -- silently costs it its bloom. An opaque
+    block above would also revert it to plain dirt on the next random tick.
+    """
+    columns = set()
+    for b in BAYS:
+        for spot in (b["shaft"], b["wall"], b["well"]):
+            if spot:
+                columns.add(spot)
+
+    interior = set()
+    for _, x0, x1, z0, z1, floor in CHAMBERS:
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                interior.add((x, floor, z))
+
+    patches = [p for p, n in grid.items() if n == "minecraft:coarse_dirt"]
+    check(len(patches) > 40, "%s: only %d bare-earth cell(s) to green" % (tag, len(patches)))
+
+    for (x, y, z) in patches:
+        check(grid.get((x, y + 1, z)) == AIR,
+              "%s: earth at (%d,%d,%d) has %s above it, so it can never bloom"
+              % (tag, x, y, z, grid.get((x, y + 1, z))))
+        check((x, z) not in columns,
+              "%s: earth at (%d,%d,%d) sits in a lift column" % (tag, x, y, z))
+        check((x, y, z) not in interior,
+              "%s: earth at (%d,%d,%d) is a chamber floor -- grass belongs under the sky"
+              % (tag, x, y, z))
+
+
 def verify_interior(tag, grid):
     """The chambers must be reachable on foot from the cella, and only from the cella.
 
@@ -291,6 +324,7 @@ def verify_assembly(choice, grid, tiles):
                         queue.append(nxt)
 
     verify_foliage(tag, grid)
+    verify_earth(tag, grid)
     verify_interior(tag, grid)
 
     beds = [p for p, n in grid.items() if n == "nabu:planting_bed"]
