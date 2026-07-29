@@ -1,7 +1,7 @@
 {
   "itemGroup.nabu": "Nabu",
 
-  "block.nabu.water_screw": "Water Screw",
+  "block.nabu.water_screw": "Archimedes Screw",
   "block.nabu.planting_bed": "Planting Bed",
   "block.nabu.silphium": "Silphium",
   "block.nabu.emmer": "Emmer",
@@ -86,7 +86,7 @@
   "item.nabu.glazed_babylonian_brick_slab": "Glazed Babylonian Brick Slab",
   "item.nabu.glazed_babylonian_brick_wall": "Glazed Babylonian Brick Wall",
 
-  "item.nabu.water_screw": "Water Screw",
+  "item.nabu.water_screw": "Archimedes Screw",
   "item.nabu.planting_bed": "Planting Bed",
   "item.nabu.garden_controller": "Garden Shrine",
   "item.nabu.silphium_seeds": "Silphium Seeds",
