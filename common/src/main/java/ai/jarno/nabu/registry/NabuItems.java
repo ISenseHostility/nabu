@@ -69,6 +69,14 @@ public final class NabuItems {
     /**
      * The harvest itself -- only obtainable from a palm that reached the fruiting stage.
      * Apple-tier hunger with much better saturation, as a dense dried fruit should be.
+     *
+     * <p>Eating one leaves its stone behind, exactly as a date does: the use remainder hands
+     * back a seed, so a fruit is never a dead end. That is not a way around the irrigation --
+     * seeds only ever grow a palm, and a palm only fruits on a boosted bed.
+     *
+     * <p>Declared after {@link #JUDEAN_DATE_SEEDS} on purpose. The properties are built when
+     * the deferred register commits, in field order, so the seed must already be registered
+     * for {@code get()} to resolve here.
      */
     public static final RegistrySupplier<Item> JUDEAN_DATE = ITEMS.register(
             "judean_date",
@@ -77,6 +85,7 @@ public final class NabuItems {
                             .nutrition(4)
                             .saturationModifier(0.5F)
                             .build())
+                    .usingConvertsTo(JUDEAN_DATE_SEEDS.get())
                     .setId(Nabu.key(Registries.ITEM, "judean_date"))));
 
     /**
