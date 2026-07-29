@@ -1,15 +1,17 @@
 package ai.jarno.nabu.blockentity;
 
 import ai.jarno.nabu.Nabu;
+import ai.jarno.nabu.advancement.GardenProgressTrigger;
 import ai.jarno.nabu.block.BedTier;
 import ai.jarno.nabu.block.GardenControllerBlock;
 import ai.jarno.nabu.block.PlantingBedBlock;
 import ai.jarno.nabu.registry.NabuBlockEntities;
 import ai.jarno.nabu.registry.NabuItems;
+import ai.jarno.nabu.registry.NabuSounds;
+import ai.jarno.nabu.registry.NabuTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -51,6 +53,13 @@ public class GardenControllerBlockEntity extends BlockEntity {
     private static final int AURA_ATTEMPTS = 4;
     private static final float AURA_CHANCE = 0.25F;
 
+    /** How close a player must be to the shrine to be credited for its milestones. */
+    private static final double TRIGGER_RADIUS = 16.0;
+
+    /** Tick of the last layer of the awakening swell, and the resting value between swells. */
+    private static final int AWAKEN_LAST_TICK = 45;
+    private static final int AWAKEN_IDLE = -1;
+
     /** Terraces with at least one registered Wonder bed. Discovered, never assumed. */
     private final Set<Integer> known = new LinkedHashSet<>();
 
@@ -65,6 +74,12 @@ public class GardenControllerBlockEntity extends BlockEntity {
     private final Set<BlockPos> beds = new LinkedHashSet<>();
 
     private boolean completed;
+
+    /**
+     * Position in the awakening flourish, or {@link #AWAKEN_IDLE} when it is not playing.
+     * Transient by design -- see {@link #tickAwakening}.
+     */
+    private int awakenTicks = AWAKEN_IDLE;
 
     public GardenControllerBlockEntity(BlockPos pos, BlockState state) {
         super(NabuBlockEntities.GARDEN_CONTROLLER.get(), pos, state);
@@ -101,6 +116,12 @@ public class GardenControllerBlockEntity extends BlockEntity {
         }
         setChanged();
         Nabu.LOGGER.info("Terrace {} restored ({}/{}).", terrace, restored.size(), known.size());
+
+        if (getLevel() instanceof ServerLevel server) {
+            server.playSound(null, worldPosition, NabuSounds.TERRACE_RESTORED.get(), SoundSource.BLOCKS, 0.8F, 1.0F);
+            NabuTriggers.fireNearby(server, worldPosition, TRIGGER_RADIUS, GardenProgressTrigger.Stage.TERRACE);
+        }
+
         checkCompletion();
     }
 
@@ -120,9 +141,39 @@ public class GardenControllerBlockEntity extends BlockEntity {
             return;
         }
         Nabu.LOGGER.info("Hanging Gardens restored at {} across {} terrace(s).", worldPosition, known.size());
-        level.playSound(null, worldPosition, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1.0F, 1.0F);
+
+        // Opens the swell; the layers themselves are played from the tick below.
+        awakenTicks = 0;
+
+        if (level instanceof ServerLevel server) {
+            NabuTriggers.fireNearby(server, worldPosition, TRIGGER_RADIUS, GardenProgressTrigger.Stage.AWAKENED);
+        }
+
         // The trophy materialises on the altar.
         Block.popResource(level, worldPosition.above(), new ItemStack(NabuItems.FERTILITY_CHARM.get()));
+    }
+
+    /**
+     * Plays the awakening as three layers rather than one hit, so completion lands as a moment.
+     *
+     * <p>Driven off {@link #awakenTicks}, which is deliberately <em>not</em> persisted: a
+     * two-second flourish is not state that matters, and saving it would have a server restart
+     * replay half a fanfare at a player who has already had the moment. The {@link #completed}
+     * latch this hangs off is persisted, and remains what guarantees it fires once.
+     */
+    private void tickAwakening(Level level, BlockPos pos) {
+        switch (awakenTicks) {
+            case 0 -> level.playSound(
+                    null, pos, NabuSounds.SHRINE_AWAKEN.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
+            case 20 -> level.playSound(
+                    null, pos, NabuSounds.SHRINE_AWAKEN_CHIME.get(), SoundSource.BLOCKS, 0.8F, 1.0F);
+            case AWAKEN_LAST_TICK -> level.playSound(
+                    null, pos, NabuSounds.SHRINE_AWAKEN_CHIME.get(), SoundSource.BLOCKS, 0.8F, 1.5F);
+            default -> {
+                // Between layers.
+            }
+        }
+        awakenTicks = awakenTicks >= AWAKEN_LAST_TICK ? AWAKEN_IDLE : awakenTicks + 1;
     }
 
     /**
@@ -180,6 +231,11 @@ public class GardenControllerBlockEntity extends BlockEntity {
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, GardenControllerBlockEntity garden) {
         long time = level.getGameTime();
+
+        // Ahead of the aura's interval gate below, since the swell needs every tick.
+        if (garden.awakenTicks != AWAKEN_IDLE) {
+            garden.tickAwakening(level, pos);
+        }
 
         if (garden.known.isEmpty() && time % ADOPT_INTERVAL_TICKS == 0L) {
             garden.adoptFlaggedBeds(level, pos);

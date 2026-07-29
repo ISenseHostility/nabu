@@ -3,12 +3,14 @@ package ai.jarno.nabu.blockentity;
 import ai.jarno.nabu.block.PlantingBedBlock;
 import ai.jarno.nabu.block.WaterScrewBlock;
 import ai.jarno.nabu.registry.NabuBlockEntities;
+import ai.jarno.nabu.registry.NabuSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -184,6 +186,9 @@ public class WaterScrewBlockEntity extends BlockEntity {
     private void activate(Level level, BlockPos pos, BlockState state) {
         maintainOutput(level);
         level.setBlock(pos, state.setValue(WaterScrewBlock.RUNNING, true), Block.UPDATE_ALL);
+        // The running loop itself is client-side and starts off the RUNNING state we just set;
+        // this is only the one-shot that marks the transition.
+        level.playSound(null, pos, NabuSounds.WATER_SCREW_START.get(), SoundSource.BLOCKS, 0.7F, 1.0F);
         refreshBedsInRange(level);
         setChanged();
     }
@@ -219,6 +224,7 @@ public class WaterScrewBlockEntity extends BlockEntity {
     private void deactivate(Level level, BlockPos pos, BlockState state) {
         clearPlacedSource(level);
         level.setBlock(pos, state.setValue(WaterScrewBlock.RUNNING, false), Block.UPDATE_ALL);
+        level.playSound(null, pos, NabuSounds.WATER_SCREW_STOP.get(), SoundSource.BLOCKS, 0.6F, 1.0F);
         refreshBedsInRange(level);
         setChanged();
     }

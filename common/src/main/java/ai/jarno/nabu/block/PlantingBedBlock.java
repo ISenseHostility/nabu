@@ -1,9 +1,13 @@
 package ai.jarno.nabu.block;
 
+import ai.jarno.nabu.advancement.GardenProgressTrigger;
 import ai.jarno.nabu.blockentity.PlantingBedBlockEntity;
+import ai.jarno.nabu.registry.NabuSounds;
+import ai.jarno.nabu.registry.NabuTriggers;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
@@ -42,6 +46,10 @@ public class PlantingBedBlock extends Block implements EntityBlock {
     public static final int BOOST_HEIGHT = 1;
 
     private static final int WATER_RADIUS = 4;
+
+    /** How close a player must be to a blooming bed to be credited for it. */
+    private static final double BLOOM_TRIGGER_RADIUS = 16.0;
+
     private static final VoxelShape SHAPE = Block.column(16.0, 0.0, 15.0);
 
     public PlantingBedBlock(Properties properties) {
@@ -116,10 +124,31 @@ public class PlantingBedBlock extends Block implements EntityBlock {
         // Same block, so the block entity survives this and its link is still intact below.
         level.setBlock(pos, state.setValue(MOISTURE, moisture).setValue(TIER, tier), Block.UPDATE_CLIENTS);
 
-        if (tier == BedTier.BOOSTED && previous != BedTier.BOOSTED
-                && level.getBlockEntity(pos) instanceof PlantingBedBlockEntity bed) {
+        if (tier != BedTier.BOOSTED || previous == BedTier.BOOSTED) {
+            return;
+        }
+
+        if (level.getBlockEntity(pos) instanceof PlantingBedBlockEntity bed) {
             bed.reportBoosted(level);
         }
+        bloom(level, pos);
+    }
+
+    /**
+     * The moment a bed comes to life. Fires on the tier edge only, so it is one chime per bloom
+     * rather than one per refresh.
+     *
+     * <p>Pitch is detuned per bed on purpose. A single screw activating calls
+     * {@code refreshBedsInRange}, which can flip several beds in the very same tick; at a fixed
+     * pitch those pile into one smeared flam, and spread out they chord instead.
+     */
+    private static void bloom(Level level, BlockPos pos) {
+        if (!(level instanceof ServerLevel server)) {
+            return;
+        }
+        float pitch = 0.9F + server.getRandom().nextFloat() * 0.2F;
+        server.playSound(null, pos, NabuSounds.PLANTING_BED_BLOOM.get(), SoundSource.BLOCKS, 0.6F, pitch);
+        NabuTriggers.fireNearby(server, pos, BLOOM_TRIGGER_RADIUS, GardenProgressTrigger.Stage.BOOSTED);
     }
 
     @Override

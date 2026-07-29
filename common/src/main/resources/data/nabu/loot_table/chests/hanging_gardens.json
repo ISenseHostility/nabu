@@ -6,6 +6,15 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "nabu:clay_tablet"
+        }
+      ]
+    },
+    {
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
           "name": "nabu:water_screw",
           "functions": [
             {

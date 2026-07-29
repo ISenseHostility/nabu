@@ -1,0 +1,28 @@
+{
+  "parent": "nabu:hanging_gardens/living_soil",
+  "criteria": {
+    "terrace_restored": {
+      "trigger": "nabu:garden_progress",
+      "conditions": {
+        "stage": "terrace"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "terrace_restored"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "nabu:garden_controller"
+    },
+    "title": {
+      "translate": "advancements.nabu.a_terrace_remembers.title"
+    },
+    "description": {
+      "translate": "advancements.nabu.a_terrace_remembers.description"
+    },
+    "frame": "goal"
+  }
+}

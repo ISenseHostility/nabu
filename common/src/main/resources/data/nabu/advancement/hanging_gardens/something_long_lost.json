@@ -1,0 +1,42 @@
+{
+  "parent": "nabu:hanging_gardens/living_soil",
+  "criteria": {
+    "silphium": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "nabu:silphium"
+          }
+        ]
+      }
+    },
+    "judean_date": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "nabu:judean_date"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "silphium",
+      "judean_date"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "nabu:silphium"
+    },
+    "title": {
+      "translate": "advancements.nabu.something_long_lost.title"
+    },
+    "description": {
+      "translate": "advancements.nabu.something_long_lost.description"
+    }
+  }
+}

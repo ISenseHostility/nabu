@@ -1,6 +1,7 @@
 package ai.jarno.nabu.registry;
 
 import ai.jarno.nabu.Nabu;
+import ai.jarno.nabu.item.ClayTabletItem;
 import ai.jarno.nabu.item.FertilityCharmItem;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -138,6 +139,29 @@ public final class NabuItems {
                             .saturationModifier(1.0F)
                             .build())
                     .setId(Nabu.key(Registries.ITEM, "date_cake"))));
+
+    public static final RegistrySupplier<Item> WITHERED_VINE = ITEMS.register(
+            "withered_vine",
+            () -> new BlockItem(
+                    NabuBlocks.WITHERED_VINE.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "withered_vine"))));
+
+    public static final RegistrySupplier<Item> WITHERED_SHRUB = ITEMS.register(
+            "withered_shrub",
+            () -> new BlockItem(
+                    NabuBlocks.WITHERED_SHRUB.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "withered_shrub"))));
+
+    /**
+     * The scribe's account of the Gardens, and the mod's only in-world explanation of the
+     * puzzle. Seeded into the Wonder's chest as its own guaranteed pool.
+     */
+    public static final RegistrySupplier<Item> CLAY_TABLET = ITEMS.register(
+            "clay_tablet",
+            () -> new ClayTabletItem(tabbed()
+                    .stacksTo(1)
+                    .rarity(Rarity.UNCOMMON)
+                    .setId(Nabu.key(Registries.ITEM, "clay_tablet"))));
 
     /**
      * One-time trophy for restoring the Gardens. Carried in the offhand, it makes breeding

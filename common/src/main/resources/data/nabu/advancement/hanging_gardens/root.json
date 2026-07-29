@@ -1,0 +1,39 @@
+{
+  "criteria": {
+    "found_the_gardens": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "structures": "nabu:hanging_gardens"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "found_the_gardens"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "nabu:babylonian_bricks"
+    },
+    "title": {
+      "translate": "advancements.nabu.root.title"
+    },
+    "description": {
+      "translate": "advancements.nabu.root.description"
+    },
+    "background": "nabu:block/babylonian_bricks",
+    "show_toast": false,
+    "announce_to_chat": false
+  }
+}

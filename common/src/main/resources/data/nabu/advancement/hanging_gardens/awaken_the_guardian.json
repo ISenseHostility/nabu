@@ -1,0 +1,31 @@
+{
+  "parent": "nabu:hanging_gardens/a_terrace_remembers",
+  "criteria": {
+    "gardens_awakened": {
+      "trigger": "nabu:garden_progress",
+      "conditions": {
+        "stage": "awakened"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "gardens_awakened"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  },
+  "display": {
+    "icon": {
+      "id": "nabu:fertility_charm"
+    },
+    "title": {
+      "translate": "advancements.nabu.awaken_the_guardian.title"
+    },
+    "description": {
+      "translate": "advancements.nabu.awaken_the_guardian.description"
+    },
+    "frame": "challenge"
+  }
+}

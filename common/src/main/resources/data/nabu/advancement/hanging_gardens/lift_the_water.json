@@ -1,0 +1,32 @@
+{
+  "parent": "nabu:hanging_gardens/root",
+  "criteria": {
+    "placed_screw": {
+      "trigger": "minecraft:placed_block",
+      "conditions": {
+        "location": [
+          {
+            "condition": "minecraft:block_state_property",
+            "block": "nabu:water_screw"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "placed_screw"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "nabu:water_screw"
+    },
+    "title": {
+      "translate": "advancements.nabu.lift_the_water.title"
+    },
+    "description": {
+      "translate": "advancements.nabu.lift_the_water.description"
+    }
+  }
+}

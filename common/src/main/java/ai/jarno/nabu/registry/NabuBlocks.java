@@ -8,6 +8,8 @@ import ai.jarno.nabu.block.JudeanDateBlock;
 import ai.jarno.nabu.block.NabuStairBlock;
 import ai.jarno.nabu.block.PlantingBedBlock;
 import ai.jarno.nabu.block.WaterScrewBlock;
+import ai.jarno.nabu.block.WitheredShrubBlock;
+import ai.jarno.nabu.block.WitheredVineBlock;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
@@ -69,6 +71,20 @@ public final class NabuBlocks {
                     .strength(3.0F)
                     .noOcclusion()
                     .setId(Nabu.key(Registries.BLOCK, "garden_controller"))));
+
+    /**
+     * Dead set dressing for the ruin. Copies vine and dead bush respectively, then has its
+     * random ticking turned off in the block itself -- see {@link WitheredVineBlock}.
+     */
+    public static final RegistrySupplier<WitheredVineBlock> WITHERED_VINE = BLOCKS.register(
+            "withered_vine",
+            () -> new WitheredVineBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.VINE)
+                    .setId(Nabu.key(Registries.BLOCK, "withered_vine"))));
+
+    public static final RegistrySupplier<WitheredShrubBlock> WITHERED_SHRUB = BLOCKS.register(
+            "withered_shrub",
+            () -> new WitheredShrubBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.DEAD_BUSH)
+                    .setId(Nabu.key(Registries.BLOCK, "withered_shrub"))));
 
     public static final BrickSet BABYLONIAN_BRICKS =
             brickSet("babylonian_bricks", "babylonian_brick");
