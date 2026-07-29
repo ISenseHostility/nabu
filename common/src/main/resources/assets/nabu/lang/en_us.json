@@ -9,6 +9,7 @@
   "block.nabu.garden_controller": "Garden Shrine",
   "block.nabu.withered_vine": "Withered Vine",
   "block.nabu.withered_shrub": "Withered Shrub",
+  "block.nabu.dead_leaves": "Dead Leaves",
 
   "block.nabu.babylonian_bricks": "Babylonian Bricks",
   "block.nabu.babylonian_brick_stairs": "Babylonian Brick Stairs",
@@ -103,6 +104,7 @@
 
   "item.nabu.withered_vine": "Withered Vine",
   "item.nabu.withered_shrub": "Withered Shrub",
+  "item.nabu.dead_leaves": "Dead Leaves",
 
   "item.nabu.clay_tablet": "Tablet of Nabu",
   "item.nabu.clay_tablet.desc": "Hold and use to read",

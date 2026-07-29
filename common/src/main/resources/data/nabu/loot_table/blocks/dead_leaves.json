@@ -34,10 +34,10 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "nabu:withered_shrub"
+          "name": "nabu:dead_leaves"
         }
       ]
     }
   ],
-  "random_sequence": "nabu:blocks/withered_shrub"
+  "random_sequence": "nabu:blocks/dead_leaves"
 }

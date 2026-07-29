@@ -152,6 +152,12 @@ public final class NabuItems {
                     NabuBlocks.WITHERED_SHRUB.get(),
                     tabbed().setId(Nabu.key(Registries.ITEM, "withered_shrub"))));
 
+    public static final RegistrySupplier<Item> DEAD_LEAVES = ITEMS.register(
+            "dead_leaves",
+            () -> new BlockItem(
+                    NabuBlocks.DEAD_LEAVES.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "dead_leaves"))));
+
     /**
      * The scribe's account of the Gardens, and the mod's only in-world explanation of the
      * puzzle. Seeded into the Wonder's chest as its own guaranteed pool.

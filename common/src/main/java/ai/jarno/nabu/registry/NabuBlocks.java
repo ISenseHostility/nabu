@@ -1,6 +1,7 @@
 package ai.jarno.nabu.registry;
 
 import ai.jarno.nabu.Nabu;
+import ai.jarno.nabu.block.DeadLeavesBlock;
 import ai.jarno.nabu.block.EmmerBlock;
 import ai.jarno.nabu.block.ExtinctCropBlock;
 import ai.jarno.nabu.block.GardenControllerBlock;
@@ -16,8 +17,11 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 
 public final class NabuBlocks {
     public static final DeferredRegister<Block> BLOCKS =
@@ -85,6 +89,24 @@ public final class NabuBlocks {
             "withered_shrub",
             () -> new WitheredShrubBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.DEAD_BUSH)
                     .setId(Nabu.key(Registries.BLOCK, "withered_shrub"))));
+
+    /**
+     * Built up from {@code Properties.of()} rather than copied off {@link Blocks#OAK_LEAVES},
+     * deliberately -- see {@link DeadLeavesBlock} for why copying leaf properties is a
+     * registration-time crash waiting to happen.
+     */
+    public static final RegistrySupplier<DeadLeavesBlock> DEAD_LEAVES = BLOCKS.register(
+            "dead_leaves",
+            () -> new DeadLeavesBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(0.2F)
+                    .sound(SoundType.GRASS)
+                    .noOcclusion()
+                    .ignitedByLava()
+                    .pushReaction(PushReaction.DESTROY)
+                    .isSuffocating((state, level, pos) -> false)
+                    .isViewBlocking((state, level, pos) -> false)
+                    .setId(Nabu.key(Registries.BLOCK, "dead_leaves"))));
 
     public static final BrickSet BABYLONIAN_BRICKS =
             brickSet("babylonian_bricks", "babylonian_brick");

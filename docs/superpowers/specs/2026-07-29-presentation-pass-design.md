@@ -263,6 +263,12 @@ without reading source.
 
 ## 4. Withered decor
 
+> **Superseded 2026-07-29, after implementation.** The aura-driven design below shipped and was
+> then replaced at Jarno's direction: a third block (`nabu:dead_leaves`) was added, and the
+> revive moved from `BonemealableBlock` to a one-time sweep gated on **every** registered bed
+> being boosted at once. See *Amendment* at the end of this section. The original is kept because
+> the reasoning about the aura invariant still holds and explains why the gate is a live read.
+
 Two blocks, both `BonemealableBlock`:
 
 | Block | Base | Revives to |
@@ -280,6 +286,41 @@ not. Withered vine keeps vine's placement, climbing and shear behaviour by inher
 Because the revive reads the live aura rather than the `completed` latch, the ruin greens up
 progressively as terraces come online and stops advancing if the screws are torn out — which is
 exactly the invariant separating the aura from the unlock.
+
+### Amendment — the greening sweep
+
+Three blocks now, none of them `BonemealableBlock`. They implement a `DeadFoliage` interface
+instead, which answers one question: what does this become?
+
+| Block | Base | Revives to |
+| --- | --- | --- |
+| `nabu:withered_vine` | `VineBlock` | `Blocks.VINE`, face booleans preserved |
+| `nabu:withered_shrub` | `VegetationBlock` | `Blocks.FERN` |
+| `nabu:dead_leaves` | plain `Block` | `Blocks.OAK_LEAVES` |
+
+**Why it moved off the aura.** Routing through `BonemealableBlock` meant bone meal in hand
+converted them, so a player could green the ruin without restoring anything. It also capped the
+reach at the aura's 12 blocks, leaving vines on outer walls permanently dead.
+
+**The gate is `liveBoostedBeds() == beds.size()`** — every registered bed boosted at once, which
+is strictly harder than `completed` (that needs only one bed per terrace). It is a *live* read, so
+the invariant above still governs: this is the garden genuinely running at full flow, not a record
+that it once did. The resulting transformation is nonetheless **one-way**, latched on a persisted
+`greened` flag, because the greening is a thing that happened to the world rather than a reading
+of current state — a bed drying out later must not un-grow a tree.
+
+**The sweep is sliced, one horizontal layer per tick** (49×49 over 33 layers, ~2s total).
+A single-pass sweep of that volume would hitch the server, and the house rule is that
+block-entity ticks stay cheap. The cursor is transient while `greened` is only set on the final
+layer, so a restart mid-sweep just replays it — reviving an already-living block is a no-op,
+which is what makes replay safe.
+
+`dead_leaves` is a plain `Block`, **not** a `LeavesBlock` subclass: vanilla leaves carry
+`distance`/`persistent` and decay with no log nearby, which would quietly delete set dressing from
+a structure containing no trees. Its properties are built from `Properties.of()` rather than
+copied off `OAK_LEAVES`, for the same `ofLegacyCopy` reason `JudeanDateBlock` documents.
+
+All three drop themselves to **shears or Silk Touch**, and nothing otherwise.
 
 ### The rule processor
 

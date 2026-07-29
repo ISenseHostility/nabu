@@ -3,6 +3,7 @@ package ai.jarno.nabu.blockentity;
 import ai.jarno.nabu.Nabu;
 import ai.jarno.nabu.advancement.GardenProgressTrigger;
 import ai.jarno.nabu.block.BedTier;
+import ai.jarno.nabu.block.DeadFoliage;
 import ai.jarno.nabu.block.GardenControllerBlock;
 import ai.jarno.nabu.block.PlantingBedBlock;
 import ai.jarno.nabu.registry.NabuBlockEntities;
@@ -60,6 +61,14 @@ public class GardenControllerBlockEntity extends BlockEntity {
     private static final int AWAKEN_LAST_TICK = 45;
     private static final int AWAKEN_IDLE = -1;
 
+    /**
+     * Reach of the greening sweep. Wider than the aura, because the dead growth dresses the whole
+     * ruin rather than clustering on the terraces the shrine waters.
+     */
+    private static final int GREEN_RADIUS = 24;
+    private static final int GREEN_HEIGHT = 16;
+    private static final int GREEN_IDLE = Integer.MIN_VALUE;
+
     /** Terraces with at least one registered Wonder bed. Discovered, never assumed. */
     private final Set<Integer> known = new LinkedHashSet<>();
 
@@ -80,6 +89,21 @@ public class GardenControllerBlockEntity extends BlockEntity {
      * Transient by design -- see {@link #tickAwakening}.
      */
     private int awakenTicks = AWAKEN_IDLE;
+
+    /**
+     * Whether the dead growth has already been brought back. Persisted, and one-way: the greening
+     * is a thing that happened to the world, not a reading of current state, so letting a bed dry
+     * out later must never un-grow a tree.
+     */
+    private boolean greened;
+
+    /**
+     * Y offset the sweep is currently working through, or {@link #GREEN_IDLE} when it is not
+     * running. Transient on purpose -- {@link #greened} is only set once the last layer is done,
+     * so a restart mid-sweep simply runs it again from the bottom. Converting an already-living
+     * block is a no-op, which is what makes replaying it safe.
+     */
+    private int greenSweepY = GREEN_IDLE;
 
     public GardenControllerBlockEntity(BlockPos pos, BlockState state) {
         super(NabuBlockEntities.GARDEN_CONTROLLER.get(), pos, state);
@@ -177,6 +201,47 @@ public class GardenControllerBlockEntity extends BlockEntity {
     }
 
     /**
+     * Bring the ruin's dead growth back, one horizontal layer per tick.
+     *
+     * <p>Sliced rather than swept in one pass because the volume is large enough that doing it in
+     * a single tick would hitch the server -- and the house rule is that block-entity ticks stay
+     * cheap. A layer is a few thousand lookups, the whole thing finishes in under two seconds,
+     * and it has the side benefit of reading as the green climbing the terraces.
+     */
+    private void tickGreenSweep(Level level, BlockPos pos) {
+        int revived = 0;
+        for (int dx = -GREEN_RADIUS; dx <= GREEN_RADIUS; dx++) {
+            for (int dz = -GREEN_RADIUS; dz <= GREEN_RADIUS; dz++) {
+                BlockPos target = pos.offset(dx, greenSweepY, dz);
+                // Never force-load: growth in unloaded chunks simply stays dead.
+                if (!level.hasChunkAt(target)) {
+                    continue;
+                }
+                BlockState state = level.getBlockState(target);
+                if (!(state.getBlock() instanceof DeadFoliage foliage)) {
+                    continue;
+                }
+                BlockState living = foliage.revived(state);
+                if (living != null) {
+                    level.setBlock(target, living, Block.UPDATE_ALL);
+                    revived++;
+                }
+            }
+        }
+        if (revived > 0) {
+            Nabu.LOGGER.debug("Greening layer {} revived {} block(s).", greenSweepY, revived);
+        }
+
+        greenSweepY++;
+        if (greenSweepY > GREEN_HEIGHT) {
+            greenSweepY = GREEN_IDLE;
+            greened = true;
+            setChanged();
+            Nabu.LOGGER.info("Greening complete at {}.", pos);
+        }
+    }
+
+    /**
      * How many registered beds are boosted <em>right now</em>. Read fresh from the world every
      * time; nothing about it is latched, so tearing out the screws fades the aura.
      */
@@ -232,9 +297,12 @@ public class GardenControllerBlockEntity extends BlockEntity {
     public static void serverTick(Level level, BlockPos pos, BlockState state, GardenControllerBlockEntity garden) {
         long time = level.getGameTime();
 
-        // Ahead of the aura's interval gate below, since the swell needs every tick.
+        // Ahead of the aura's interval gate below, since both of these need every tick.
         if (garden.awakenTicks != AWAKEN_IDLE) {
             garden.tickAwakening(level, pos);
+        }
+        if (garden.greenSweepY != GREEN_IDLE) {
+            garden.tickGreenSweep(level, pos);
         }
 
         if (garden.known.isEmpty() && time % ADOPT_INTERVAL_TICKS == 0L) {
@@ -245,12 +313,24 @@ public class GardenControllerBlockEntity extends BlockEntity {
             return;
         }
 
-        boolean powered = garden.liveBoostedBeds() > 0;
+        // Read once: the aura, the block state and the greening gate all want the same number.
+        int live = garden.liveBoostedBeds();
+
+        boolean powered = live > 0;
         if (state.getValue(GardenControllerBlock.POWERED) != powered) {
             level.setBlock(pos, state.setValue(GardenControllerBlock.POWERED, powered), Block.UPDATE_CLIENTS);
         }
         if (powered && level instanceof ServerLevel server) {
             garden.radiate(server, pos);
+        }
+
+        // Every registered bed boosted at once, not merely one per terrace. Stricter than the
+        // completion latch on purpose, and read live, so this is the garden genuinely running at
+        // full flow rather than a record that it once did.
+        if (!garden.greened && garden.greenSweepY == GREEN_IDLE
+                && !garden.beds.isEmpty() && live == garden.beds.size()) {
+            garden.greenSweepY = -GREEN_HEIGHT;
+            Nabu.LOGGER.info("All {} bed(s) boosted at {}; greening the ruin.", live, pos);
         }
     }
 
@@ -285,6 +365,7 @@ public class GardenControllerBlockEntity extends BlockEntity {
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putBoolean("completed", completed);
+        output.putBoolean("greened", greened);
         output.putIntArray("known", known.stream().mapToInt(Integer::intValue).toArray());
         output.putIntArray("restored", restored.stream().mapToInt(Integer::intValue).toArray());
         output.store("beds", BlockPos.CODEC.listOf(), List.copyOf(beds));
@@ -294,6 +375,7 @@ public class GardenControllerBlockEntity extends BlockEntity {
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         completed = input.getBooleanOr("completed", false);
+        greened = input.getBooleanOr("greened", false);
         known.clear();
         restored.clear();
         beds.clear();
