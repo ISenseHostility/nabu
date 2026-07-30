@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "mossy_babylonian_tiles",
+  "ingredients": [
+    "nabu:babylonian_tiles",
+    "minecraft:moss_block"
+  ],
+  "result": {
+    "id": "nabu:mossy_babylonian_tiles"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "nabu:babylonian_tiles",
+  "result": {
+    "count": 1,
+    "id": "nabu:babylonian_tile_stairs"
+  }
+}

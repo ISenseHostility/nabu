@@ -1,0 +1,48 @@
+{
+  "block.water_screw.running": {
+    "subtitle": "subtitles.nabu.water_screw.running",
+    "sounds": [
+      "minecraft:liquid/water"
+    ]
+  },
+  "block.water_screw.start": {
+    "subtitle": "subtitles.nabu.water_screw.start",
+    "sounds": [
+      "minecraft:item/bucket/empty1"
+    ]
+  },
+  "block.water_screw.stop": {
+    "subtitle": "subtitles.nabu.water_screw.stop",
+    "sounds": [
+      "minecraft:item/bucket/fill1"
+    ]
+  },
+  "block.planting_bed.bloom": {
+    "subtitle": "subtitles.nabu.planting_bed.bloom",
+    "sounds": [
+      "minecraft:block/amethyst/resonate1",
+      "minecraft:block/amethyst/resonate2",
+      "minecraft:block/amethyst/resonate3",
+      "minecraft:block/amethyst/resonate4"
+    ]
+  },
+  "block.garden_shrine.terrace_restored": {
+    "subtitle": "subtitles.nabu.garden_shrine.terrace_restored",
+    "sounds": [
+      "minecraft:block/beacon/power1",
+      "minecraft:block/beacon/power2",
+      "minecraft:block/beacon/power3"
+    ]
+  },
+  "block.garden_shrine.awaken": {
+    "subtitle": "subtitles.nabu.garden_shrine.awaken",
+    "sounds": [
+      "minecraft:block/conduit/activate"
+    ]
+  },
+  "block.garden_shrine.awaken_chime": {
+    "sounds": [
+      "minecraft:block/amethyst/shimmer"
+    ]
+  }
+}

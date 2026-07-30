@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "nabu:judean_date",
+    "nabu:judean_date",
+    "nabu:judean_date",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "nabu:date_syrup"
+  }
+}

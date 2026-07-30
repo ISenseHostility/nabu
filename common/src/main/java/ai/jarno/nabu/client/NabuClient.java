@@ -1,6 +1,7 @@
 package ai.jarno.nabu.client;
 
 import ai.jarno.nabu.client.render.WaterScrewModel;
+import ai.jarno.nabu.client.sound.ClientScrewAudio;
 import ai.jarno.nabu.client.render.WaterScrewRenderer;
 import ai.jarno.nabu.registry.NabuBlockEntities;
 import ai.jarno.nabu.registry.NabuBlocks;
@@ -18,10 +19,18 @@ public final class NabuClient {
     }
 
     public static void init() {
+        // Install the client ends of the two hooks common leaves as no-ops. Nothing on a
+        // dedicated server reaches this method, so neither implementation is ever classloaded.
+        ClientScrewAudio.install();
+        ClientTabletReader.install();
+
         EntityModelLayerRegistry.register(WaterScrewModel.LAYER, WaterScrewModel::create);
         BlockEntityRendererRegistry.register(NabuBlockEntities.WATER_SCREW.get(), WaterScrewRenderer::new);
         // The awakened basin's water plane is tintindex 0 over the greyscale water sprite,
         // the same arrangement as a filled cauldron, so it borrows the same tint source.
         ColorHandlerRegistry.registerBlockColors(BlockTintSources.water(), NabuBlocks.GARDEN_CONTROLLER);
+        // The revived fern is vanilla's greyscale fern sprite over tintindex 0, so it takes the
+        // same grass tint a vanilla fern does and shifts with the biome it stands in.
+        ColorHandlerRegistry.registerBlockColors(BlockTintSources.grass(), NabuBlocks.GARDEN_FERN);
     }
 }

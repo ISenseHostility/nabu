@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_judean_date": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "nabu:judean_date"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_judean_date"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "nabu:date_syrup"
+    ]
+  }
+}

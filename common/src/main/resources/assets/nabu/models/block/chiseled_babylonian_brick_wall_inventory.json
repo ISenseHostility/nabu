@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "nabu:block/chiseled_babylonian_bricks"
+  }
+}

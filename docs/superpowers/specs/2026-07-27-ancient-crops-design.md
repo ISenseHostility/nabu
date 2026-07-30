@@ -8,8 +8,9 @@ Status: approved, ready for planning
 Add two extinct crops alongside Silphium, each exercising a growth form Silphium does not:
 
 - **Judean Date** — a two-block-tall crop.
-- **Emmer** — a self-planting crop: right-click harvest that regrows, plus occasional
-  self-seeding onto neighbouring beds.
+- **Emmer** — a self-planting crop: it seeds itself onto neighbouring beds over time, and can
+  be pushed onto one deliberately with bone meal. (Originally specced with a regrowing
+  right-click harvest; that was replaced on 2026-07-28 — see below.)
 
 Both are historically grounded the way Silphium is. The Judean date palm went extinct
 around the 6th century and was germinated in 2005 from 2000-year-old seeds recovered at
@@ -156,23 +157,37 @@ Then:
 
 `ai.jarno.nabu.block.EmmerBlock extends ExtinctCropBlock`. Ages 0–7 from `CropBlock`. The
 fruiting gate is inherited *unchanged* — capped at 6 unless the bed is Boosted. The only
-override to the base behaviour is `getBaseSeedId()` returning `emmer_seeds`. Two behaviours
-are added on top.
+override to the base behaviour is `getBaseSeedId()` returning the emmer item itself. Two
+behaviours are added on top.
 
-### Right-click harvest
+### ~~Right-click harvest~~ → Bone-meal spread
 
-Override `useWithoutItem`:
+**Superseded 2026-07-28.** The original design had `useWithoutItem` pop 1–2 `emmer` at max age
+and reset the plant to `REGROWN_AGE = 4`, leaving it standing. That was removed on request.
+Emmer is now harvested by breaking it, like Silphium; the loot table already yields
+`nabu:emmer` at age 7, so grain access is unchanged — what is lost is harvesting without
+replanting.
 
-- Age < `MAX_AGE`: return `InteractionResult.PASS` so ordinary interaction is unaffected.
-- Age == `MAX_AGE`: pop 1–2 `emmer`, play a harvest sound, and set the state to
-  `REGROWN_AGE = 4` instead of breaking the block.
+In its place, **bone meal on a max-age plant sows a seedling on a nearby bed**:
 
-Regrowth is 3 growth steps rather than the 7 a fresh seed needs — meaningfully faster than
-replanting, not free. Because age 7 is only reachable on a Boosted bed, right-click harvest
-is inherently a Boosted-only reward; no extra gate is required. Breaking the block by hand
-still yields seeds, which remains the way to get planting stock for manual expansion.
+- `isValidBonemealTarget` — true if the plant can still grow (inherited behaviour), *or* if it
+  is at max age and at least one nearby bed can take a seedling.
+- `performBonemeal` — grow if it can still grow, otherwise sow one seedling at a random valid
+  target.
+- With no valid target the block is not a bone-meal target at all, so nothing is consumed.
 
-### Self-seeding
+The second branch tests `isMaxAge`, **not** "growth is capped". Those look interchangeable and
+are not: a plant on an unwatered bed is also capped, one stage short of fruiting, and hanging
+the spread off that would hand the player the reward without ever running a screw. Max age is
+Boosted-only by construction, so gating on it keeps the ladder intact — the same reasoning
+that made the old right-click harvest safe.
+
+### Self-seeding (the passive path)
+
+The two spreading paths differ on purpose: this one runs on every mature plant, so it must
+stay O(1); the bone-meal path above is triggered by a player and can afford to scan the whole
+box, which is what makes it dependable rather than a coin flip. Both share one
+`canSowAt` predicate, so "where may Emmer take root" is defined in exactly one place.
 
 On random tick, when at `MAX_AGE`:
 
@@ -196,8 +211,14 @@ Consequences, stated deliberately:
 
 ### Items
 
-- `emmer_seeds` — `BlockItem` placing the crop.
-- `emmer` — the grain. Inert, no food component. Reserved as a future crafting ingredient.
+- `emmer` — the grain **and** the seed. A `BlockItem` that both drops from the crop and
+  replants it. No food component; reserved as a future crafting ingredient.
+
+**Superseded 2026-07-28.** Emmer originally had a separate `emmer_seeds` item, with the grain
+inert. It now replants itself the way a carrot does: one item that is both harvest and seed,
+so expanding a field costs grain rather than a second currency to track. The loot table
+follows vanilla's carrot shape — one emmer always, plus a Fortune-scaled bonus pool at age 7 —
+and `emmer_seeds` is removed entirely, including from the Wonder's chest loot.
 
 ## Registration and data
 
@@ -206,9 +227,9 @@ Following the existing patterns in `NabuBlocks` / `NabuItems` exactly.
 **`NabuBlocks`** — two entries, both `ofLegacyCopy(Blocks.WHEAT)` like Silphium, each with
 its `setId(Nabu.key(Registries.BLOCK, …))`.
 
-**`NabuItems`** — four entries, all via `tabbed()` so they land in the existing creative tab
-automatically: `judean_date_seeds`, `judean_date` (with the food component), `emmer_seeds`,
-`emmer`.
+**`NabuItems`** — three entries, all via `tabbed()` so they land in the existing creative tab
+automatically: `judean_date_seeds`, `judean_date` (with the food component), and `emmer`
+(a `BlockItem`, since it is its own seed).
 
 **Data files:**
 
@@ -232,6 +253,12 @@ playable and testable without art, and the art swap later is a texture-path edit
 **Placeholders used** (all confirmed present in 26.2):
 
 - Emmer: `minecraft:block/wheat_stage0`–`7`, parent `minecraft:block/crop`.
+- **Model shape, set 2026-07-28.** Emmer and Silphium use `minecraft:block/crop`, the
+  four-plane `#` arrangement vanilla gives grain. The Judean Date uses
+  `minecraft:block/cross`, the two-plane X, which suits a plant with a single trunk far
+  better than four parallel sheets of palm. Note the texture key differs with the
+  parent: `crop` takes `#crop`, `cross` takes `#cross`, so the two cannot be swapped by
+  changing the parent alone.
 - Judean Date bottoms, ages 0–4 in order: `pitcher_crop_bottom_stage_1`, `_stage_1`,
   `_stage_2`, `_stage_3`, `_stage_4`. (Vanilla has no `_stage_0`; age 0 reuses stage 1.)
 - Judean Date tops, ages 2–4 in order: `pitcher_crop_top`, `pitcher_crop_top_stage_3`,
@@ -250,12 +277,15 @@ playable and testable without art, and the art swap later is a texture-path edit
   `_stage2/3/4_bottom.json` + `_stage2/3/4_top.json`.
 - `items/*.json` + `models/item/*.json` for all four items.
 
-**Needed from Jarno later** (art is his, per `CLAUDE.md`): real 16×16 textures at
-`assets/nabu/textures/block/emmer_stage0-7.png`,
-`assets/nabu/textures/block/judean_date_{stage0,stage1}.png`,
-`judean_date_stage{2,3,4}_{bottom,top}.png`, and
-`assets/nabu/textures/item/{emmer,emmer_seeds,judean_date,judean_date_seeds}.png`. Swapping
-them in is a one-line edit per model file.
+**Resolved 2026-07-28.** The vanilla placeholders are gone. All three crops now have their own
+16×16 stage textures under `assets/nabu/textures/block/` and their items under
+`assets/nabu/textures/item/`, and every model points at them. These are still generated
+placeholders rather than hand-drawn art, so replacing any of them remains a file drop with no
+JSON change — the paths already match the model names.
+
+Two constraints worth keeping if they are ever redrawn: the palm's trunk must be the same
+width in a stage's lower and upper halves or it steps at the block boundary, and the three
+plants have to be separable by silhouette, not colour alone.
 
 ## Testing
 
@@ -269,7 +299,10 @@ for Claude Code to launch the game. Verification is therefore:
    - Bone meal on the Judean Date stops at the same caps as natural growth.
    - Judean Date under a ceiling stalls at age 1 and does not eat the ceiling block.
    - Breaking either half of a Judean Date drops exactly one set of loot.
-   - Emmer right-clicked at full growth drops grain and regrows rather than breaking.
+   - Bone meal on a still-growing Emmer grows it, capped by the bed tier as before.
+   - Bone meal on a **max-age** Emmer sows a seedling on a nearby bed and is consumed;
+     with no bed in range nothing happens and the bone meal is **not** consumed.
+   - Bone meal on an age-6 Emmer on an *unwatered* bed does nothing — it must not spread.
    - Emmer at full growth eventually seeds an empty planting bed nearby, and never seeds
      vanilla farmland placed next to it.
    - Both crops survive a save/load cycle mid-growth.

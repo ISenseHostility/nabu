@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "nabu:babylonian_bricks",
+  "result": {
+    "count": 1,
+    "id": "nabu:polished_babylonian_brick_wall"
+  }
+}

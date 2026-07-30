@@ -1,0 +1,27 @@
+{
+  "parent": "nabu:hanging_gardens/lift_the_water",
+  "criteria": {
+    "bed_boosted": {
+      "trigger": "nabu:garden_progress",
+      "conditions": {
+        "stage": "boosted"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "bed_boosted"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "nabu:planting_bed"
+    },
+    "title": {
+      "translate": "advancements.nabu.living_soil.title"
+    },
+    "description": {
+      "translate": "advancements.nabu.living_soil.description"
+    }
+  }
+}

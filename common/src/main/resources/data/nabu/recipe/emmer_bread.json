@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": "nabu:emmer"
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "id": "nabu:emmer_bread"
+  }
+}

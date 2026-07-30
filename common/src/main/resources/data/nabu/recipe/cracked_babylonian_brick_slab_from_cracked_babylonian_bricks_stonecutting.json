@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "nabu:cracked_babylonian_bricks",
+  "result": {
+    "count": 2,
+    "id": "nabu:cracked_babylonian_brick_slab"
+  }
+}

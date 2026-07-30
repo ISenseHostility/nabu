@@ -1,6 +1,7 @@
 package ai.jarno.nabu.registry;
 
 import ai.jarno.nabu.Nabu;
+import ai.jarno.nabu.item.ClayTabletItem;
 import ai.jarno.nabu.item.FertilityCharmItem;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -8,7 +9,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.level.block.Block;
 
 public final class NabuItems {
     public static final DeferredRegister<Item> ITEMS =
@@ -44,17 +48,16 @@ public final class NabuItems {
             "silphium",
             () -> new Item(tabbed().setId(Nabu.key(Registries.ITEM, "silphium"))));
 
-    /** Plantable seed. Placing it sows the crop. */
-    public static final RegistrySupplier<Item> EMMER_SEEDS = ITEMS.register(
-            "emmer_seeds",
-            () -> new BlockItem(
-                    NabuBlocks.EMMER.get(),
-                    tabbed().setId(Nabu.key(Registries.ITEM, "emmer_seeds"))));
-
-    /** The grain itself -- reserved as a crafting ingredient, no use yet. */
+    /**
+     * The grain, and the thing you sow. Emmer has no separate seed item: the harvest replants
+     * itself the way a carrot does, so a field costs you grain to expand rather than a second
+     * currency to keep track of.
+     */
     public static final RegistrySupplier<Item> EMMER = ITEMS.register(
             "emmer",
-            () -> new Item(tabbed().setId(Nabu.key(Registries.ITEM, "emmer"))));
+            () -> new BlockItem(
+                    NabuBlocks.EMMER.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "emmer"))));
 
     /** Plantable seed. Placing it sows the crop. */
     public static final RegistrySupplier<Item> JUDEAN_DATE_SEEDS = ITEMS.register(
@@ -66,6 +69,14 @@ public final class NabuItems {
     /**
      * The harvest itself -- only obtainable from a palm that reached the fruiting stage.
      * Apple-tier hunger with much better saturation, as a dense dried fruit should be.
+     *
+     * <p>Eating one leaves its stone behind, exactly as a date does: the use remainder hands
+     * back a seed, so a fruit is never a dead end. That is not a way around the irrigation --
+     * seeds only ever grow a palm, and a palm only fruits on a boosted bed.
+     *
+     * <p>Declared after {@link #JUDEAN_DATE_SEEDS} on purpose. The properties are built when
+     * the deferred register commits, in field order, so the seed must already be registered
+     * for {@code get()} to resolve here.
      */
     public static final RegistrySupplier<Item> JUDEAN_DATE = ITEMS.register(
             "judean_date",
@@ -74,7 +85,110 @@ public final class NabuItems {
                             .nutrition(4)
                             .saturationModifier(0.5F)
                             .build())
+                    .usingConvertsTo(JUDEAN_DATE_SEEDS.get())
                     .setId(Nabu.key(Registries.ITEM, "judean_date"))));
+
+    /**
+     * Refined silphium -- {@code laserpicium}, the resin that was the actual traded product.
+     * Not food itself; it is the input both of silphium's uses share.
+     */
+    public static final RegistrySupplier<Item> SILPHIUM_RESIN = ITEMS.register(
+            "silphium_resin",
+            () -> new Item(tabbed().setId(Nabu.key(Registries.ITEM, "silphium_resin"))));
+
+    /**
+     * Date syrup -- {@code dibs}, Mesopotamia's sweetener before honey was common. Bottled,
+     * which costs three properties rather than one: it is drunk rather than eaten, drinking
+     * hands back the empty bottle, and so does <em>crafting</em> with it, so baking a cake
+     * does not quietly swallow the glass. A honey bottle behaves the same three ways.
+     */
+    public static final RegistrySupplier<Item> DATE_SYRUP = ITEMS.register(
+            "date_syrup",
+            () -> new Item(tabbed()
+                    .food(
+                            new FoodProperties.Builder()
+                                    .nutrition(2)
+                                    .saturationModifier(0.4F)
+                                    .build(),
+                            Consumables.DEFAULT_DRINK)
+                    .usingConvertsTo(Items.GLASS_BOTTLE)
+                    .craftRemainder(Items.GLASS_BOTTLE)
+                    .stacksTo(16)
+                    .setId(Nabu.key(Registries.ITEM, "date_syrup"))));
+
+    /** What emmer was actually for. A shade better than vanilla bread's 5 / 0.6. */
+    public static final RegistrySupplier<Item> EMMER_BREAD = ITEMS.register(
+            "emmer_bread",
+            () -> new Item(tabbed()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(6)
+                            .saturationModifier(0.8F)
+                            .build())
+                    .setId(Nabu.key(Registries.ITEM, "emmer_bread"))));
+
+    /** Cooked meat rubbed with resin. Saturation-led, because seasoning is the whole point. */
+    public static final RegistrySupplier<Item> SPICED_MEAT = ITEMS.register(
+            "spiced_meat",
+            () -> new Item(tabbed()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(7)
+                            .saturationModifier(1.1F)
+                            .build())
+                    .setId(Nabu.key(Registries.ITEM, "spiced_meat"))));
+
+    /**
+     * Grain and syrup meeting directly -- the one point where two chains cross, and the payoff
+     * for having run both.
+     */
+    public static final RegistrySupplier<Item> DATE_CAKE = ITEMS.register(
+            "date_cake",
+            () -> new Item(tabbed()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(8)
+                            .saturationModifier(1.0F)
+                            .build())
+                    .setId(Nabu.key(Registries.ITEM, "date_cake"))));
+
+    public static final RegistrySupplier<Item> WITHERED_VINE = ITEMS.register(
+            "withered_vine",
+            () -> new BlockItem(
+                    NabuBlocks.WITHERED_VINE.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "withered_vine"))));
+
+    public static final RegistrySupplier<Item> WITHERED_SHRUB = ITEMS.register(
+            "withered_shrub",
+            () -> new BlockItem(
+                    NabuBlocks.WITHERED_SHRUB.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "withered_shrub"))));
+
+    public static final RegistrySupplier<Item> DEAD_LEAVES = ITEMS.register(
+            "dead_leaves",
+            () -> new BlockItem(
+                    NabuBlocks.DEAD_LEAVES.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "dead_leaves"))));
+
+    public static final RegistrySupplier<Item> DEAD_MOSS = ITEMS.register(
+            "dead_moss",
+            () -> new BlockItem(
+                    NabuBlocks.DEAD_MOSS.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "dead_moss"))));
+
+    public static final RegistrySupplier<Item> GARDEN_FERN = ITEMS.register(
+            "garden_fern",
+            () -> new BlockItem(
+                    NabuBlocks.GARDEN_FERN.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "garden_fern"))));
+
+    /**
+     * The scribe's account of the Gardens, and the mod's only in-world explanation of the
+     * puzzle. Seeded into the Wonder's chest as its own guaranteed pool.
+     */
+    public static final RegistrySupplier<Item> CLAY_TABLET = ITEMS.register(
+            "clay_tablet",
+            () -> new ClayTabletItem(tabbed()
+                    .stacksTo(1)
+                    .rarity(Rarity.UNCOMMON)
+                    .setId(Nabu.key(Registries.ITEM, "clay_tablet"))));
 
     /**
      * One-time trophy for restoring the Gardens. Carried in the offhand, it makes breeding
@@ -95,7 +209,34 @@ public final class NabuItems {
         return new Item.Properties().arch$tab(NabuCreativeTabs.MAIN);
     }
 
+    /** Registers a block item for each of a variant's four blocks, in creative-tab order. */
+    private static void blockItems(BrickSet set) {
+        blockItem(set.baseName(), set.block());
+        blockItem(set.formPrefix() + "_stairs", set.stairs());
+        blockItem(set.formPrefix() + "_slab", set.slab());
+        blockItem(set.formPrefix() + "_wall", set.wall());
+    }
+
+    private static void blockItem(String name, RegistrySupplier<? extends Block> block) {
+        ITEMS.register(
+                name,
+                () -> new BlockItem(
+                        block.get(),
+                        tabbed().setId(Nabu.key(Registries.ITEM, name))));
+    }
+
     public static void register() {
+        // Registered here rather than in field initialisers so the sixteen decorative blocks
+        // land after the Wonder's own items in the creative tab.
+        blockItems(NabuBlocks.BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.CRACKED_BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.MOSSY_BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.POLISHED_BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.SMOOTH_BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.BABYLONIAN_TILES);
+        blockItems(NabuBlocks.MOSSY_BABYLONIAN_TILES);
+        blockItems(NabuBlocks.CHISELED_BABYLONIAN_BRICKS);
+        blockItems(NabuBlocks.GLAZED_BABYLONIAN_BRICKS);
         ITEMS.register();
     }
 }

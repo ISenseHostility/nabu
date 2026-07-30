@@ -10,26 +10,8 @@
       "rolls": 1.0,
       "entries": [
         {
-          "type": "minecraft:alternatives",
-          "children": [
-            {
-              "type": "minecraft:item",
-              "name": "nabu:emmer",
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "nabu:emmer",
-                  "properties": {
-                    "age": "7"
-                  }
-                }
-              ]
-            },
-            {
-              "type": "minecraft:item",
-              "name": "nabu:emmer_seeds"
-            }
-          ]
+          "type": "minecraft:item",
+          "name": "nabu:emmer"
         }
       ]
     },
@@ -47,7 +29,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "nabu:emmer_seeds",
+          "name": "nabu:emmer",
           "functions": [
             {
               "function": "minecraft:apply_bonus",

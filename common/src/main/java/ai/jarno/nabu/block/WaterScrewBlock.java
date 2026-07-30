@@ -1,5 +1,6 @@
 package ai.jarno.nabu.block;
 
+import ai.jarno.nabu.blockentity.ScrewAudio;
 import ai.jarno.nabu.blockentity.WaterScrewBlockEntity;
 import ai.jarno.nabu.registry.NabuBlockEntities;
 import com.mojang.serialization.MapCodec;
@@ -50,9 +51,13 @@ public class WaterScrewBlock extends BaseEntityBlock {
     @Override
     public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
-        // Priming and water delivery are server-authoritative; the client only renders.
+        // Priming and water delivery are server-authoritative. The client ticks only to keep
+        // the running loop alive -- it makes no decisions and touches no state.
         if (level.isClientSide()) {
-            return null;
+            return createTickerHelper(
+                    type,
+                    NabuBlockEntities.WATER_SCREW.get(),
+                    (tickLevel, tickPos, tickState, screw) -> ScrewAudio.tick(tickLevel, tickPos, tickState));
         }
         return createTickerHelper(type, NabuBlockEntities.WATER_SCREW.get(), WaterScrewBlockEntity::serverTick);
     }

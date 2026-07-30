@@ -4,6 +4,9 @@ import ai.jarno.nabu.registry.NabuBlockEntities;
 import ai.jarno.nabu.registry.NabuBlocks;
 import ai.jarno.nabu.registry.NabuCreativeTabs;
 import ai.jarno.nabu.registry.NabuItems;
+import ai.jarno.nabu.registry.NabuPotions;
+import ai.jarno.nabu.registry.NabuSounds;
+import ai.jarno.nabu.registry.NabuTriggers;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -29,6 +32,10 @@ public final class Nabu {
         NabuBlocks.register();
         NabuItems.register();
         NabuBlockEntities.register();
+        // Potions must exist before either loader assembles PotionBrewing.
+        NabuPotions.register();
+        NabuSounds.register();
+        NabuTriggers.register();
     }
 
     /** Namespaced identifier in this mod's namespace. */

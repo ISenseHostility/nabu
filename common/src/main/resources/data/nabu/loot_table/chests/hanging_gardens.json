@@ -6,14 +6,23 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "nabu:clay_tablet"
+        }
+      ]
+    },
+    {
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
           "name": "nabu:water_screw",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 4.0,
-                "max": 6.0
+                "min": 5.0,
+                "max": 7.0
               }
             }
           ]
@@ -44,7 +53,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "nabu:emmer_seeds",
+          "name": "nabu:emmer",
           "functions": [
             {
               "function": "minecraft:set_count",

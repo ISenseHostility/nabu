@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:block/crop",
+  "parent": "minecraft:block/cross",
   "textures": {
-    "crop": "minecraft:block/pitcher_crop_top_stage_3"
+    "cross": "nabu:block/judean_date_stage3_top"
   }
 }

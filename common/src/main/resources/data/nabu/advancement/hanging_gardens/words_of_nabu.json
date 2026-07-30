@@ -1,0 +1,31 @@
+{
+  "parent": "nabu:hanging_gardens/root",
+  "criteria": {
+    "has_tablet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "nabu:clay_tablet"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_tablet"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "nabu:clay_tablet"
+    },
+    "title": {
+      "translate": "advancements.nabu.words_of_nabu.title"
+    },
+    "description": {
+      "translate": "advancements.nabu.words_of_nabu.description"
+    }
+  }
+}

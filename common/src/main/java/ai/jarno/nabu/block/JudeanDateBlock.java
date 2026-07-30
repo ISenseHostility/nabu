@@ -5,9 +5,13 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -23,6 +27,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
@@ -48,6 +54,13 @@ public class JudeanDateBlock extends DoublePlantBlock implements BonemealableBlo
 
     /** Age from which the palm stands two blocks tall. */
     private static final int DOUBLE_FROM = 2;
+
+    /** Age a picked palm falls back to: full height, bare. */
+    private static final int HARVESTED_AGE = MAX_AGE - 1;
+
+    /** Dates handed over by one right-click harvest, inclusive at both ends. */
+    private static final int HARVEST_MIN = 1;
+    private static final int HARVEST_MAX = 3;
 
     /** One in this many random ticks advances the plant. */
     private static final int GROWTH_ODDS = 6;
@@ -172,7 +185,7 @@ public class JudeanDateBlock extends DoublePlantBlock implements BonemealableBlo
         }
 
         if (random.nextInt(GROWTH_ODDS) == 0) {
-            grow(level, pos, age + 1);
+            setAge(level, pos, age + 1);
         }
     }
 
@@ -187,8 +200,14 @@ public class JudeanDateBlock extends DoublePlantBlock implements BonemealableBlo
         return isDouble(from) || !isDouble(to) || level.isEmptyBlock(lowerPos.above());
     }
 
-    /** Write the new age to both halves at once, creating the upper one if it is time. */
-    private void grow(ServerLevel level, BlockPos lowerPos, int age) {
+    /**
+     * Write an age to both halves at once, creating the upper one if it is time.
+     *
+     * <p>Deliberately not named {@code grow}: harvesting runs the age back down through here
+     * too, and at every age this crop can be set to, both halves already exist or are created
+     * together, so the direction of travel makes no difference to the write.
+     */
+    private void setAge(ServerLevel level, BlockPos lowerPos, int age) {
         level.setBlock(lowerPos,
                 defaultBlockState().setValue(AGE, age).setValue(HALF, DoubleBlockHalf.LOWER),
                 Block.UPDATE_CLIENTS);
@@ -199,9 +218,44 @@ public class JudeanDateBlock extends DoublePlantBlock implements BonemealableBlo
         }
     }
 
-    /** Bone meal may be applied to either half; growth always happens from the lower one. */
+    /** Either half may be clicked or bone-mealed; every write happens from the lower one. */
     private static BlockPos lowerPos(BlockState state, BlockPos pos) {
         return state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos.below() : pos;
+    }
+
+    // --- harvest ---------------------------------------------------------------------
+
+    /**
+     * Pick the dates by hand and leave the palm standing.
+     *
+     * <p>Offered only at {@link #MAX_AGE}, which is boosted-only by construction, so this is a
+     * reward for the irrigation rather than a way around it -- the same reasoning that keeps
+     * bone meal honest. The palm falls back to {@link #HARVESTED_AGE}: full height, bare. It
+     * re-fruits through the ordinary growth path, so it climbs that last rung again only while
+     * the bed beneath it is still boosted.
+     *
+     * <p>Breaking the palm is untouched and remains the way to get planting stock: the loot
+     * table still yields a date plus seeds at max age.
+     */
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                               Player player, BlockHitResult hit) {
+        if (state.getValue(AGE) != MAX_AGE) {
+            // Not ripe: fall through to normal interaction rather than eating the click.
+            return InteractionResult.PASS;
+        }
+
+        if (level instanceof ServerLevel server) {
+            RandomSource random = server.getRandom();
+            int yield = HARVEST_MIN + random.nextInt(HARVEST_MAX - HARVEST_MIN + 1);
+            // Popped at the clicked half, so the fruit falls where the player reached for it.
+            popResource(server, pos, new ItemStack(NabuItems.JUDEAN_DATE.get(), yield));
+            server.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS,
+                    1.0F, 0.8F + random.nextFloat() * 0.4F);
+            setAge(server, lowerPos(state, pos), HARVESTED_AGE);
+            server.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+        }
+        return InteractionResult.SUCCESS;
     }
 
     // --- bone meal -------------------------------------------------------------------
@@ -226,7 +280,7 @@ public class JudeanDateBlock extends DoublePlantBlock implements BonemealableBlo
         int age = state.getValue(AGE);
         int grown = Math.min(growthCap(level, lower), age + 1);
         if (grown > age && hasRoomToReach(level, lower, age, grown)) {
-            grow(level, lower, grown);
+            setAge(level, lower, grown);
         }
     }
 }
