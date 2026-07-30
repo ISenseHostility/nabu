@@ -217,25 +217,28 @@ def earth_cells(variant):
     return {(x, z) for x in range(SIZE_X) for z in range(SIZE_Z) if bare_earth(x, z, variant)}
 
 
+def moss_patch(x, z, variant, salt):
+    """The shape of a moss patch, wherever it is laid.
+
+    Built like the soil drifts but clustered off a 3x3 grid rather than a 4x4 one: moss creeps
+    along the stone in smaller, more broken tongues than soil blows into drifts. The salt is
+    what keeps each surface its own -- the decks and the three chamber floors would otherwise
+    all wear the same pattern stacked on top of one another.
+    """
+    return rnd(x // 3, z // 3, 79 + salt, variant) < 175 and rnd(x, z, 83 + salt, variant) < 640
+
+
 def dead_moss(x, z, variant):
     """Whether this deck cell is dried moss crust rather than paving.
 
-    Built the same way as the soil drifts and rolled off different salts, so the two settle in
-    different places and neither is the negative of the other. Clustered off a 3x3 grid rather
-    than a 4x4 one: moss creeps along the stone in smaller, more broken tongues than soil blows
-    into drifts.
+    Rolled off different salts from the soil, so the two settle in different places, and
+    declining any cell the soil already took so neither is the negative of the other.
 
     Unlike bare earth this asks nothing of the cell above it. Dead moss is a full cube and
     revives into another one, so a parapet, a wall or a shrub standing on a patch is all fine --
     which is why it is not fed to the decoration pass as reserved ground.
     """
-    return (rnd(x // 3, z // 3, 79, variant) < 175
-            and rnd(x, z, 83, variant) < 640
-            and not bare_earth(x, z, variant))
-
-
-def moss_cells(variant):
-    return {(x, z) for x in range(SIZE_X) for z in range(SIZE_Z) if dead_moss(x, z, variant)}
+    return moss_patch(x, z, variant, 0) and not bare_earth(x, z, variant)
 
 
 def protected_cells():
@@ -568,7 +571,13 @@ def build_interior(v, variant):
     for _, x0, x1, z0, z1, floor in CHAMBERS:
         for x in range(x0, x1 + 1):
             for z in range(z0, z1 + 1):
-                v.set(x, floor, z, paving(x, z, variant))
+                # Sealed, unlit and directly under the terraces the water runs through, which is
+                # exactly where moss belongs. Salted per floor so each chamber wears its own
+                # pattern rather than the one on the deck overhead.
+                if moss_patch(x, z, variant, floor):
+                    v.set(x, floor, z, DEAD_MOSS)
+                else:
+                    v.set(x, floor, z, paving(x, z, variant))
                 for y in range(floor + 1, floor + 4):
                     v.set(x, y, z, AIR)
 

@@ -194,11 +194,13 @@ def verify_earth(tag, grid):
 
 
 def verify_moss(tag, grid):
-    """Dried moss must sit on the terrace decks, and nowhere the puzzle needs.
+    """Dried moss must sit on a floor -- deck or chamber -- and nowhere the puzzle needs.
 
     Far laxer than `verify_earth` on purpose: moss is a full cube that revives into another one,
-    so it does not care what stands on it and nothing has to keep the sky clear above it. What
-    it must not do is take a cell the lift or the planting owns.
+    so it does not care what stands on it and nothing has to keep the sky clear above it. That
+    is also why it is allowed indoors where the soil drifts are not. What it must not do is take
+    a cell the lift or the planting owns, or end up buried in tier mass where nobody will ever
+    see it revive.
     """
     columns = set()
     surface = {}
@@ -209,17 +211,24 @@ def verify_moss(tag, grid):
         for cell in list(b["channel"]) + list(b["beds"]):
             surface[cell] = b["deck"]
 
+    floors = set()
+    for _, x0, x1, z0, z1, floor in CHAMBERS:
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                floors.add((x, floor, z))
+
     patches = [p for p, n in grid.items() if n == "nabu:dead_moss"]
     check(len(patches) > 40, "%s: only %d dead moss cell(s) to green" % (tag, len(patches)))
+    check(any(p in floors for p in patches), "%s: no dead moss on any chamber floor" % tag)
 
     for (x, y, z) in patches:
         check((x, z) not in columns,
               "%s: dead moss at (%d,%d,%d) sits in a lift column" % (tag, x, y, z))
         check(surface.get((x, z)) != y,
               "%s: dead moss at (%d,%d,%d) has taken bay ground" % (tag, x, y, z))
-        # It replaces paving, so it is always the top of its column rather than buried mass.
-        check(deck_at(x, z) == y,
-              "%s: dead moss at (%d,%d,%d) is not a deck cell (deck is %s)"
+        # It only ever replaces paving, so it is a surface underfoot rather than buried mass.
+        check(deck_at(x, z) == y or (x, y, z) in floors,
+              "%s: dead moss at (%d,%d,%d) is neither a deck nor a chamber floor (deck is %s)"
               % (tag, x, y, z, deck_at(x, z)))
 
 
