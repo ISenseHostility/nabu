@@ -2,6 +2,7 @@ package ai.jarno.nabu.registry;
 
 import ai.jarno.nabu.Nabu;
 import ai.jarno.nabu.block.DeadLeavesBlock;
+import ai.jarno.nabu.block.DeadMossBlock;
 import ai.jarno.nabu.block.EmmerBlock;
 import ai.jarno.nabu.block.ExtinctCropBlock;
 import ai.jarno.nabu.block.GardenControllerBlock;
@@ -103,6 +104,22 @@ public final class NabuBlocks {
             "garden_fern",
             () -> new GardenFernBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.FERN)
                     .setId(Nabu.key(Registries.BLOCK, "garden_fern"))));
+
+    /**
+     * Dried moss crust on the brick. Becomes vanilla's moss block when the shrine wakes -- see
+     * {@link DeadMossBlock}, which also explains why it is built up rather than copied.
+     *
+     * <p>Pushed by a piston it breaks, as moss does. That is the state it is heading for anyway,
+     * and a crust that survived being shoved around would be the odd one out.
+     */
+    public static final RegistrySupplier<DeadMossBlock> DEAD_MOSS = BLOCKS.register(
+            "dead_moss",
+            () -> new DeadMossBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_BROWN)
+                    .strength(0.1F)
+                    .sound(SoundType.MOSS)
+                    .pushReaction(PushReaction.DESTROY)
+                    .setId(Nabu.key(Registries.BLOCK, "dead_moss"))));
 
     /**
      * Built up from {@code Properties.of()} rather than copied off {@link Blocks#OAK_LEAVES},

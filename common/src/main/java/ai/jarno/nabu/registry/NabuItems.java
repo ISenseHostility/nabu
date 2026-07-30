@@ -167,6 +167,12 @@ public final class NabuItems {
                     NabuBlocks.DEAD_LEAVES.get(),
                     tabbed().setId(Nabu.key(Registries.ITEM, "dead_leaves"))));
 
+    public static final RegistrySupplier<Item> DEAD_MOSS = ITEMS.register(
+            "dead_moss",
+            () -> new BlockItem(
+                    NabuBlocks.DEAD_MOSS.get(),
+                    tabbed().setId(Nabu.key(Registries.ITEM, "dead_moss"))));
+
     public static final RegistrySupplier<Item> GARDEN_FERN = ITEMS.register(
             "garden_fern",
             () -> new BlockItem(

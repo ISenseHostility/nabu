@@ -7,6 +7,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -26,6 +27,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
+import java.util.List;
+
 /**
  * The shrine controller: the thing that knows whether the Gardens are alive again.
  */
@@ -34,9 +37,6 @@ public class GardenControllerBlock extends BaseEntityBlock {
 
     /** Live state, not the permanent unlock: true while at least one bed is currently boosted. */
     public static final BooleanProperty POWERED = BooleanProperty.create("powered");
-
-    private static final int SURVEY_RADIUS_HORIZONTAL = GardenControllerBlockEntity.REACH_HORIZONTAL;
-    private static final int SURVEY_RADIUS_VERTICAL = GardenControllerBlockEntity.REACH_VERTICAL;
 
     /**
      * Traces the font silhouette rather than a full cube, so the selection outline follows the
@@ -112,14 +112,14 @@ public class GardenControllerBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide()) {
+        if (!(level instanceof ServerLevel server)) {
             return InteractionResult.SUCCESS;
         }
         if (!(level.getBlockEntity(pos) instanceof GardenControllerBlockEntity controller)) {
             return InteractionResult.PASS;
         }
 
-        int adopted = survey(level, pos, controller);
+        int adopted = survey(server, pos, controller);
         player.sendSystemMessage(Component.literal(
                 "Surveyed %d bed(s) over %d terrace(s); %d restored, %d boosted now%s".formatted(
                         adopted,
@@ -130,33 +130,28 @@ public class GardenControllerBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    private static int survey(Level level, BlockPos pos, GardenControllerBlockEntity controller) {
-        int adopted = 0;
-        for (BlockPos candidate : BlockPos.betweenClosed(
-                pos.offset(-SURVEY_RADIUS_HORIZONTAL, -SURVEY_RADIUS_VERTICAL, -SURVEY_RADIUS_HORIZONTAL),
-                pos.offset(SURVEY_RADIUS_HORIZONTAL, SURVEY_RADIUS_VERTICAL, SURVEY_RADIUS_HORIZONTAL))) {
-            if (!(level.getBlockState(candidate).getBlock() instanceof PlantingBedBlock)) {
-                continue;
-            }
-            if (!(level.getBlockEntity(candidate) instanceof PlantingBedBlockEntity bed)) {
-                continue;
-            }
+    /**
+     * Shares the controller's own reach and its chunk walk rather than reading every block in
+     * the box. At the reach the shrine needs to span the monument from its corner that box is
+     * two hundred thousand lookups, which is not something to run on a click.
+     */
+    private static int survey(ServerLevel level, BlockPos pos, GardenControllerBlockEntity controller) {
+        List<PlantingBedBlockEntity> beds = GardenControllerBlockEntity.bedsInReach(level, pos);
+        for (PlantingBedBlockEntity bed : beds) {
+            // One terrace per level, matching the index the worldgen markers hand out.
+            bed.linkTo(pos, bed.getBlockPos().getY());
+            controller.registerBed(bed.getBlockPos().getY(), bed.getBlockPos());
+        }
 
-            // betweenClosed hands back one reused mutable position.
-            BlockPos bedPos = candidate.immutable();
-            // One terrace per level. M5 replaces this with explicit indices from the markers.
-            int terrace = bedPos.getY();
-
-            bed.linkTo(pos, terrace);
-            controller.registerBed(terrace, bedPos);
-            adopted++;
-
+        // Only once the whole roster is registered. Reporting inside the loop above would let
+        // the completion check see a terrace list that was still filling up.
+        for (PlantingBedBlockEntity bed : beds) {
             // A bed that is already boosted should latch now rather than wait for a transition
             // that has, from its point of view, already happened.
-            if (PlantingBedBlock.tierAt(level, bedPos) == BedTier.BOOSTED) {
+            if (PlantingBedBlock.tierAt(level, bed.getBlockPos()) == BedTier.BOOSTED) {
                 bed.reportBoosted(level);
             }
         }
-        return adopted;
+        return beds.size();
     }
 }

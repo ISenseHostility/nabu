@@ -87,6 +87,7 @@ CHISELED = ("nabu:chiseled_babylonian_bricks", None)
 TILES = ("nabu:babylonian_tiles", None)
 MOSSY_TILES = ("nabu:mossy_babylonian_tiles", None)
 COARSE_DIRT = ("minecraft:coarse_dirt", None)
+DEAD_MOSS = ("nabu:dead_moss", None)
 PARAPET = ("nabu:babylonian_brick_wall", None)
 STAIR = ("nabu:babylonian_brick_stairs", {"facing": "north", "half": "bottom", "shape": "straight"})
 AIR = ("minecraft:air", None)
@@ -216,6 +217,27 @@ def earth_cells(variant):
     return {(x, z) for x in range(SIZE_X) for z in range(SIZE_Z) if bare_earth(x, z, variant)}
 
 
+def dead_moss(x, z, variant):
+    """Whether this deck cell is dried moss crust rather than paving.
+
+    Built the same way as the soil drifts and rolled off different salts, so the two settle in
+    different places and neither is the negative of the other. Clustered off a 3x3 grid rather
+    than a 4x4 one: moss creeps along the stone in smaller, more broken tongues than soil blows
+    into drifts.
+
+    Unlike bare earth this asks nothing of the cell above it. Dead moss is a full cube and
+    revives into another one, so a parapet, a wall or a shrub standing on a patch is all fine --
+    which is why it is not fed to the decoration pass as reserved ground.
+    """
+    return (rnd(x // 3, z // 3, 79, variant) < 175
+            and rnd(x, z, 83, variant) < 640
+            and not bare_earth(x, z, variant))
+
+
+def moss_cells(variant):
+    return {(x, z) for x in range(SIZE_X) for z in range(SIZE_Z) if dead_moss(x, z, variant)}
+
+
 def protected_cells():
     """Everything the bays own. Decoration and paving must not touch these."""
     keep = set()
@@ -242,6 +264,8 @@ def fill_mass(v, variant):
                         v.set(x, y, z, BRICK)      # bays rewrite their own decks below
                     elif not in_stair(x, z) and bare_earth(x, z, variant):
                         v.set(x, y, z, COARSE_DIRT)
+                    elif not in_stair(x, z) and dead_moss(x, z, variant):
+                        v.set(x, y, z, DEAD_MOSS)
                     else:
                         v.set(x, y, z, paving(x, z, variant))
                 elif y == CISTERN_Y and 1 <= x <= 31 and 1 <= z <= 31 and not in_stair(x, z):

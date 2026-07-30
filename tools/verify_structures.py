@@ -25,14 +25,15 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import nbt
 from generate_structures import (
     BAYS, CHAMBERS, CHAMBER_CHESTS, CHAMBER_LOOT, CHEST_POSITIONS, CISTERN_Y, LINKS, NEWEL,
-    OUT, REPO, SEAM_X, SEAM_Z, SHRINE_POS, SIZE_X, SIZE_Z, SLABS, piece_names, stair_treads,
+    OUT, REPO, SEAM_X, SEAM_Z, SHRINE_POS, SIZE_X, SIZE_Z, SLABS, deck_at, piece_names,
+    stair_treads,
 )
 
 # Mirrored from common/. If these ever diverge, this check is worthless -- keep them in step.
 BOOST_RADIUS, BOOST_HEIGHT = 4, 1          # PlantingBedBlock
 WATER_RADIUS = 4                           # PlantingBedBlock.nearWater, dy in {0, +1}
 MARKER_H, MARKER_V = 4, 2                  # BedMarkers
-REACH_H, REACH_V = 16, 12                  # GardenControllerBlockEntity
+REACH_H, REACH_V = 32, 24                  # GardenControllerBlockEntity
 
 CHEST_SCREWS_MIN = 5                       # loot_table/chests/hanging_gardens.json
 
@@ -103,6 +104,9 @@ FULL_CUBES = {
     "nabu:polished_babylonian_bricks", "nabu:smooth_babylonian_bricks",
     "nabu:chiseled_babylonian_bricks", "nabu:glazed_babylonian_bricks",
     "nabu:babylonian_tiles", "nabu:mossy_babylonian_tiles",
+    # Dead moss is a full cube and revives into one -- vanilla's moss block -- so unlike dead
+    # leaves it still holds up whatever is standing on it after the sweep passes.
+    "nabu:dead_moss",
 }
 
 FOLIAGE = {"nabu:dead_leaves", "nabu:withered_shrub", "nabu:withered_vine"}
@@ -187,6 +191,36 @@ def verify_earth(tag, grid):
         check((x, y, z) not in interior,
               "%s: earth at (%d,%d,%d) is a chamber floor -- grass belongs under the sky"
               % (tag, x, y, z))
+
+
+def verify_moss(tag, grid):
+    """Dried moss must sit on the terrace decks, and nowhere the puzzle needs.
+
+    Far laxer than `verify_earth` on purpose: moss is a full cube that revives into another one,
+    so it does not care what stands on it and nothing has to keep the sky clear above it. What
+    it must not do is take a cell the lift or the planting owns.
+    """
+    columns = set()
+    surface = {}
+    for b in BAYS:
+        for spot in (b["shaft"], b["wall"], b["well"]):
+            if spot:
+                columns.add(spot)
+        for cell in list(b["channel"]) + list(b["beds"]):
+            surface[cell] = b["deck"]
+
+    patches = [p for p, n in grid.items() if n == "nabu:dead_moss"]
+    check(len(patches) > 40, "%s: only %d dead moss cell(s) to green" % (tag, len(patches)))
+
+    for (x, y, z) in patches:
+        check((x, z) not in columns,
+              "%s: dead moss at (%d,%d,%d) sits in a lift column" % (tag, x, y, z))
+        check(surface.get((x, z)) != y,
+              "%s: dead moss at (%d,%d,%d) has taken bay ground" % (tag, x, y, z))
+        # It replaces paving, so it is always the top of its column rather than buried mass.
+        check(deck_at(x, z) == y,
+              "%s: dead moss at (%d,%d,%d) is not a deck cell (deck is %s)"
+              % (tag, x, y, z, deck_at(x, z)))
 
 
 def verify_interior(tag, grid):
@@ -325,6 +359,7 @@ def verify_assembly(choice, grid, tiles):
 
     verify_foliage(tag, grid)
     verify_earth(tag, grid)
+    verify_moss(tag, grid)
     verify_interior(tag, grid)
 
     beds = [p for p, n in grid.items() if n == "nabu:planting_bed"]
@@ -443,6 +478,20 @@ def main():
     check(re.search(r"BOOST_RADIUS\s*=\s*%d\b" % BOOST_RADIUS, src), "BOOST_RADIUS drifted from PlantingBedBlock")
     check(re.search(r"BOOST_HEIGHT\s*=\s*%d\b" % BOOST_HEIGHT, src), "BOOST_HEIGHT drifted from PlantingBedBlock")
     check(re.search(r"WATER_RADIUS\s*=\s*%d\b" % WATER_RADIUS, src), "WATER_RADIUS drifted from PlantingBedBlock")
+
+    src = open(os.path.join(REPO, "common", "src", "main", "java", "ai", "jarno", "nabu",
+                            "blockentity", "GardenControllerBlockEntity.java"), encoding="utf-8").read()
+    check(re.search(r"REACH_HORIZONTAL\s*=\s*%d\b" % REACH_H, src),
+          "REACH_HORIZONTAL drifted from GardenControllerBlockEntity")
+    check(re.search(r"REACH_VERTICAL\s*=\s*%d\b" % REACH_V, src),
+          "REACH_VERTICAL drifted from GardenControllerBlockEntity")
+
+    src = open(os.path.join(REPO, "common", "src", "main", "java", "ai", "jarno", "nabu",
+                            "worldgen", "BedMarkers.java"), encoding="utf-8").read()
+    check(re.search(r"MARKER_RADIUS_HORIZONTAL\s*=\s*%d\b" % MARKER_H, src),
+          "MARKER_RADIUS_HORIZONTAL drifted from BedMarkers")
+    check(re.search(r"MARKER_RADIUS_VERTICAL\s*=\s*%d\b" % MARKER_V, src),
+          "MARKER_RADIUS_VERTICAL drifted from BedMarkers")
 
     print("combinations checked: %d   screws needed: %d   beds: %d-%d"
           % (len(combos), screws, min(bed_counts), max(bed_counts)))

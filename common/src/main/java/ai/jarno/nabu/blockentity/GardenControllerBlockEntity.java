@@ -23,10 +23,12 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -44,11 +46,18 @@ public class GardenControllerBlockEntity extends BlockEntity {
     private static final int ADOPT_INTERVAL_TICKS = 100;
 
     /**
-     * Reach for finding beds. Wider than tall, and tall enough to look well above itself: the
-     * shrine stands at the reservoir while the beds it tracks sit on the terrace overhead.
+     * Reach for finding beds, measured from an edge rather than from the middle.
+     *
+     * <p>The shrine stands in the reservoir court on the north face, so the near lip of the
+     * monument is three blocks away and the far one thirty; a radius sized for a centred origin
+     * silently stops covering the far side. Sized to span the whole 33-block footprint from that
+     * corner with room to spare, and to look from the court floor up past the summit deck.
+     *
+     * <p>Deliberately generous. The old pair cleared the beds that exist today by a single
+     * block, which is not a margin -- it is a coincidence that moving one terrace would end.
      */
-    public static final int REACH_HORIZONTAL = 16;
-    public static final int REACH_VERTICAL = 12;
+    public static final int REACH_HORIZONTAL = 32;
+    public static final int REACH_VERTICAL = 24;
 
     // Reaches upward as well as outward, so a shrine standing at the reservoir still touches
     // the terrace planting above it.
@@ -341,36 +350,86 @@ public class GardenControllerBlockEntity extends BlockEntity {
     /**
      * Claim beds a worldgen marker flagged for us.
      *
-     * <p>Jigsaw pieces are placed chunk by chunk, so bed pieces routinely land after the shrine
-     * does. Rather than have markers chase a controller that may not exist yet, the shrine keeps
-     * looking until it finds its beds and then stops.
+     * <p>Jigsaw pieces are placed chunk by chunk and chunks arrive in whatever order the player
+     * walks, so bed pieces routinely land -- or become readable to us -- after the shrine does.
+     * Rather than have markers chase a controller that may not exist yet, the shrine looks for
+     * them itself.
+     *
+     * <p>It keeps looking indefinitely rather than stopping at the first pass that finds
+     * anything. That gate was the bug: a pass that ran while one corner of the monument was
+     * still unloaded latched a partial roster of terraces, and every question downstream of it
+     * -- which terraces exist, and therefore when the Wonder is complete -- was answered against
+     * that partial view forever after. Repeating is affordable because the scan walks the block
+     * entities each chunk already keeps rather than every block in a 65x49x65 box, and it is
+     * harmless because only a worldgen marker can flag a bed: a shrine a player raises in their
+     * own base walks a few map entries every five seconds and adopts nothing, ever.
      */
-    private void adoptFlaggedBeds(Level level, BlockPos pos) {
-        int adopted = 0;
-        for (BlockPos candidate : BlockPos.betweenClosed(
-                pos.offset(-REACH_HORIZONTAL, -REACH_VERTICAL, -REACH_HORIZONTAL),
-                pos.offset(REACH_HORIZONTAL, REACH_VERTICAL, REACH_HORIZONTAL))) {
-            if (!(level.getBlockState(candidate).getBlock() instanceof PlantingBedBlock)
-                    || !(level.getBlockEntity(candidate) instanceof PlantingBedBlockEntity bed)) {
-                continue;
-            }
+    private void adoptFlaggedBeds(ServerLevel level, BlockPos pos) {
+        List<PlantingBedBlockEntity> adopted = new ArrayList<>();
+        for (PlantingBedBlockEntity bed : bedsInReach(level, pos)) {
             // Only marker-flagged beds, and only ones nobody has claimed yet.
             if (!bed.isFlagged() || bed.isWonderBed()) {
                 continue;
             }
-
-            BlockPos bedPos = candidate.immutable();
             bed.linkTo(pos, bed.terrace());
-            registerBed(bed.terrace(), bedPos);
-            adopted++;
+            registerBed(bed.terrace(), bed.getBlockPos());
+            adopted.add(bed);
+        }
 
-            if (PlantingBedBlock.tierAt(level, bedPos) == BedTier.BOOSTED) {
+        if (adopted.isEmpty()) {
+            return;
+        }
+        Nabu.LOGGER.info("Shrine at {} adopted {} flagged bed(s); {} terrace(s) known.",
+                pos, adopted.size(), known.size());
+
+        // Reported only once every bed in this pass is registered. Inline, the first already
+        // boosted bed would hand checkCompletion a `known` set that was still filling up, and it
+        // would latch the whole Wonder complete off whichever terrace happened to be walked
+        // first.
+        for (PlantingBedBlockEntity bed : adopted) {
+            if (PlantingBedBlock.tierAt(level, bed.getBlockPos()) == BedTier.BOOSTED) {
                 bed.reportBoosted(level);
             }
         }
-        if (adopted > 0) {
-            Nabu.LOGGER.info("Shrine at {} adopted {} flagged bed(s).", pos, adopted);
+    }
+
+    /**
+     * Every planting bed within reach of {@code pos}, in chunks that happen to be loaded.
+     *
+     * <p>Walks the block entities each chunk already keeps rather than reading every block in a
+     * 65x49x65 box -- a couple of hundred thousand lookups against a few dozen map entries --
+     * which is what makes a repeating scan affordable at all. It never force-loads either: a
+     * chunk that has not arrived is simply absent from the answer, rather than generated from
+     * inside a block-entity tick.
+     */
+    public static List<PlantingBedBlockEntity> bedsInReach(ServerLevel level, BlockPos pos) {
+        List<PlantingBedBlockEntity> found = new ArrayList<>();
+        int minChunkX = (pos.getX() - REACH_HORIZONTAL) >> 4;
+        int maxChunkX = (pos.getX() + REACH_HORIZONTAL) >> 4;
+        int minChunkZ = (pos.getZ() - REACH_HORIZONTAL) >> 4;
+        int maxChunkZ = (pos.getZ() + REACH_HORIZONTAL) >> 4;
+
+        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                LevelChunk chunk = level.getChunkSource().getChunkNow(chunkX, chunkZ);
+                if (chunk == null) {
+                    continue;
+                }
+                for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                    if (blockEntity instanceof PlantingBedBlockEntity bed
+                            && inReach(pos, blockEntity.getBlockPos())) {
+                        found.add(bed);
+                    }
+                }
+            }
         }
+        return found;
+    }
+
+    private static boolean inReach(BlockPos shrine, BlockPos bed) {
+        return Math.abs(bed.getX() - shrine.getX()) <= REACH_HORIZONTAL
+                && Math.abs(bed.getY() - shrine.getY()) <= REACH_VERTICAL
+                && Math.abs(bed.getZ() - shrine.getZ()) <= REACH_HORIZONTAL;
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, GardenControllerBlockEntity garden) {
@@ -389,8 +448,8 @@ public class GardenControllerBlockEntity extends BlockEntity {
             garden.tickBloom(server);
         }
 
-        if (garden.known.isEmpty() && time % ADOPT_INTERVAL_TICKS == 0L) {
-            garden.adoptFlaggedBeds(level, pos);
+        if (time % ADOPT_INTERVAL_TICKS == 0L && level instanceof ServerLevel server) {
+            garden.adoptFlaggedBeds(server, pos);
         }
 
         if (time % AURA_INTERVAL_TICKS != 0L) {
